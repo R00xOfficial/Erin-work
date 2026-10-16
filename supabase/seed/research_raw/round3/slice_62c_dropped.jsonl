@@ -1,0 +1,15 @@
+{"name": "RDJW Architects", "reason": "Crawley address only from directories; no working own website found (rdjw.com parked for sale)"}
+{"name": "Sadler Architects", "reason": "sadlerarchitects.com does not resolve"}
+{"name": "Jones Architects (Steyning)", "reason": "own site returned 503 / unreachable, could not verify currency"}
+{"name": "RS Architectural Designs (Horsham)", "reason": "site loads with address RH12 1TE but no dates, projects or copyright; currency unverified; only hotmail email"}
+{"name": "Miller Architects (Forest Row)", "reason": "site loads, address RH18 5HL, but copyright 2016 and last modified 2022; not shown current"}
+{"name": "George Calver Architects", "reason": "Surrey (Caterham CR3), outside geography"}
+{"name": "SHW (Crawley/Gatwick)", "reason": "already in database as Stiles Harold Williams"}
+{"name": "Eye For Detail Architects / EFD", "reason": "already in EXISTING_SOUTH"}
+{"name": "Horsham District Council", "reason": "site returns 403 to all fetches; cannot verify"}
+{"name": "Saxon Weald", "reason": "site returns 403; cannot verify"}
+{"name": "Design Focused Architects (Steyning)", "reason": "only a Yell listing; no own site found"}
+{"name": "JNA Architects (Crawley)", "reason": "only directory listing; no own site found"}
+{"name": "GWP Architects (Burgess Hill)", "reason": "only a directory listing; no own site found"}
+{"name": "Atelier T&B (Steyning)", "reason": "only Bark listing; no own site found"}
+{"name": "Gaffney Architecture (Horsham)", "reason": "no evidence found of own site"}
