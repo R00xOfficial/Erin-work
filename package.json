@@ -1,0 +1,25 @@
+{
+  "name": "architecture-job-intelligence",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Personal recruitment-intelligence platform for an entry-level architecture job search across the London–Petersfield corridor.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "dev": "pnpm --filter @ajis/web dev",
+    "dev:worker": "pnpm --filter @ajis/worker dev",
+    "build": "pnpm -r --filter './packages/*' build && pnpm -r --filter './apps/*' build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:test": "bash supabase/tests/smoke.sh",
+    "db:reset": "pnpm dlx supabase db reset",
+    "db:push": "pnpm dlx supabase db push",
+    "db:seed": "psql \"$SUPABASE_DB_URL\" -v ON_ERROR_STOP=1 -f supabase/seed.sql",
+    "db:types": "pnpm dlx supabase gen types typescript --project-id sdxteghszuqscbnpjpnz --schema public > packages/db/src/types.ts",
+    "worker:once": "pnpm --filter @ajis/worker once"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
