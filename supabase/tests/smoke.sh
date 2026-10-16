@@ -34,4 +34,12 @@ echo "== seed (twice, must be idempotent)"
 psql "$SMOKE_DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
 psql "$SMOKE_DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
 psql "$SMOKE_DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/tests/smoke_seed.sql
+# Optional extra seed files (researched employers). Applied twice to prove idempotency.
+EXTRA_SEEDS="${SMOKE_EXTRA_SEEDS:-$(ls supabase/seed/*.sql 2>/dev/null || true)}"
+for f in $EXTRA_SEEDS; do
+  echo "== extra seed (twice): $f"
+  psql "$SMOKE_DB_URL" -v ON_ERROR_STOP=1 -q -f "$f"
+  psql "$SMOKE_DB_URL" -v ON_ERROR_STOP=1 -q -f "$f"
+  psql "$SMOKE_DB_URL" -At -c "select 'employers=' || count(*) || ' offices=' || (select count(*) from public.offices) || ' tasks=' || (select count(*) from public.tasks) || ' dup_domains=' || (select count(*) from (select website_domain from public.employers where website_domain is not null group by 1 having count(*) > 1) d) from public.employers"
+done
 echo "== OK"
