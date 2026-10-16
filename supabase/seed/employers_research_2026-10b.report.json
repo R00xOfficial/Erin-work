@@ -1,0 +1,97 @@
+{
+ "research_date": "2026-10-16",
+ "raw_records": 164,
+ "bad_json_lines": 0,
+ "after_validation": 155,
+ "duplicates_merged": 3,
+ "final": 152,
+ "dropped_count": 9,
+ "dropped_by_reason": {
+  "confidence below 70": 7,
+  "website not live": 1,
+  "already in database": 1
+ },
+ "by_zone": {
+  "A": 87,
+  "B": 18,
+  "C": 9,
+  "EXT": 35,
+  "OUT": 3
+ },
+ "by_practice_type": {
+  "architecture_practice": 95,
+  "multidisciplinary_consultancy": 5,
+  "interior_workplace_design": 7,
+  "building_surveying": 9,
+  "bim_visualisation_studio": 2,
+  "urban_design_masterplanning": 1,
+  "heritage_conservation": 5,
+  "planning_consultancy": 8,
+  "specialist_consultancy": 2,
+  "local_authority": 6,
+  "university_research": 1,
+  "architectural_technologists": 3,
+  "other": 1,
+  "residential_developer": 5,
+  "construction_design_build": 2
+ },
+ "by_slice": {
+  "11": 6,
+  "12": 23,
+  "13": 8,
+  "14": 63,
+  "15": 14,
+  "16": 38
+ },
+ "with_postcode": 148,
+ "with_entry_evidence": 30,
+ "with_generic_or_apps_email": 121,
+ "fuzzy_name_pairs": [],
+ "dropped": [
+  {
+   "name": "Nick Adams Architects",
+   "reason": "confidence below 70",
+   "slice": 12
+  },
+  {
+   "name": "CPL Architects (Church Projects Limited)",
+   "reason": "confidence below 70",
+   "slice": 12
+  },
+  {
+   "name": "Springwheel Associates",
+   "reason": "website not live (curl: (35) Recv failure: Connection reset by peer)",
+   "slice": 13
+  },
+  {
+   "name": "Reynolds Design",
+   "reason": "confidence below 70",
+   "slice": 13
+  },
+  {
+   "name": "Nicholls Architecture and Design Ltd",
+   "reason": "confidence below 70",
+   "slice": 13
+  },
+  {
+   "name": "University of Winchester",
+   "reason": "confidence below 70",
+   "slice": 15
+  },
+  {
+   "name": "University Hospital Southampton NHS Foundation Trust",
+   "reason": "confidence below 70",
+   "slice": 15
+  },
+  {
+   "name": "Publica",
+   "reason": "already in database",
+   "slice": 16
+  },
+  {
+   "name": "Architectural Visualisation London",
+   "reason": "confidence below 70",
+   "slice": 16
+  }
+ ]
+}
