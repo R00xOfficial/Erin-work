@@ -79,6 +79,8 @@ for (const r of raw) {
   const domain = extractDomain(website);
   if (!canonicalWebsite || !domain) { dropped.push({ name, reason: `bad website ${website}`, slice: r.slice }); continue; }
   if (!r.town || !r.town.trim()) { dropped.push({ name, reason: "missing town", slice: r.slice }); continue; }
+  const minConfidence = Number(process.env.MIN_CONFIDENCE ?? 0);
+  if (Number(r.confidence ?? 60) < minConfidence) { dropped.push({ name, reason: `confidence below ${minConfidence}`, slice: r.slice }); continue; }
   const live = liveness[website];
   if (live && !live.ok) { dropped.push({ name, reason: `website not live (${live.reason})`, slice: r.slice }); continue; }
   const norm = normaliseCompanyName(name);
