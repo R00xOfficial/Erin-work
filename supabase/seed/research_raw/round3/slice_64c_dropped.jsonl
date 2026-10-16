@@ -1,0 +1,11 @@
+{"name":"Hampshire County Council Property Services","reason":"hants.gov.uk returned 403 to WebFetch; in-house design team seen only in search snippet; likely overlaps Hampshire Design Consultancy already in DB"}
+{"name":"Islington Council (Islington Architects)","reason":"In-house architects/apprenticeship seen only via third-party listings (Bright Network 2023, closed); islington.gov.uk pages 404, democracy site 403, no address confirmed"}
+{"name":"Brighton & Hove City Council","reason":"In-house Architecture & Design Team seen only in a job-board snippet; own-site fetches 404; no verified address"}
+{"name":"Southampton City Council","reason":"In-house Capital Projects design team only in a job-ad snippet; own-site fetches returned no content/address"}
+{"name":"West Sussex County Council apprenticeships page","reason":"Already in EXISTING_SOUTH; page shows no architecture/design apprenticeship"}
+{"name":"Peabody","reason":"Site loads (SE1 7JB) but careers pages show no architecture/design graduate or apprenticeship route; design function evidence is old third-party interviews"}
+{"name":"Clarion Housing Group / Latimer","reason":"Careers page shows no architecture/design route; Architecture Social says design teams appointed externally"}
+{"name":"Places for People","reason":"Apprenticeships page lists no architecture/design roles; no address on page"}
+{"name":"Abri","reason":"Homepage shows no in-house design team or graduate/apprenticeship evidence; no address on page"}
+{"name":"University of Sussex / Kingston University / UHS Estates","reason":"Estates pages 404 or 403; UHS job page showed no team, location or address"}
+{"name":"Hackney, Lewisham, Southwark, Newham, Lambeth councils","reason":"Only generic apprenticeship pages (building control etc.); no visible in-house architecture function found"}
