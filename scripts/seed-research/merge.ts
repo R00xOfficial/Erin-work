@@ -11,6 +11,7 @@
  *
  * Rules: shared normalisers decide identity (domain first, then normalised name); the higher-confidence
  * record wins and missing fields are filled from the other; fuzzy name matches are reported, never merged.
+ * Set EXCLUDE_DIRS to skip firms found in earlier research rounds.
  * Generated SQL is idempotent (deterministic ids, on conflict do nothing) and contains no DROP statements.
  */
 import { createHash } from "node:crypto";
@@ -34,6 +35,20 @@ if (!researchDir || !outBase) { console.error("usage: merge.ts <research_dir> <o
 
 const EXISTING_DOMAINS = new Set(["mharchitects.co.uk", "makearchitects.com", "hampshiredesignconsultancy.co.uk", "farrells.com", "donaldinsall.com"]);
 const EXISTING_NAMES = new Set(["mh architects", "make architects", "make", "hampshire design consultancy", "farrells", "donald insall associates"].map((n) => normaliseCompanyName(n)));
+// EXCLUDE_DIRS=dirA,dirB: records in earlier rounds' slice_*.jsonl (already loaded, merged or dropped) are never re-added.
+for (const dir of (process.env.EXCLUDE_DIRS ?? "").split(",").filter(Boolean)) {
+  for (const f of readdirSync(dir).filter((x) => /^slice_\d+\.jsonl$/.test(x))) {
+    for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const o = JSON.parse(line) as Rec;
+        const d = o.website ? extractDomain(o.website) : null;
+        if (d) EXISTING_DOMAINS.add(d);
+        if (o.name) EXISTING_NAMES.add(normaliseCompanyName(o.name));
+      } catch { /* ignore malformed lines; the main pass reports them */ }
+    }
+  }
+}
 const RESEARCH_DATE = process.env.RESEARCH_DATE ?? new Date().toISOString().slice(0, 10);
 
 const uuidFrom = (seed: string) => {
