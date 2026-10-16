@@ -12,8 +12,10 @@ Branch: `claude/architecture-job-intelligence-iwwfb5`. No PR has been opened.
   (generated into `*.batches/`, gitignored) -> run each through the Supabase SQL API -> compare the md5 fingerprint with a local docker run (`supabase/tests/smoke.sh`).
 
 ## Still open
-1. **Companies House key.** Worker reads `COMPANIES_HOUSE_API_KEY`. It was added to the cloud environment after the session started, so it was not visible; a new session should see it.
+1. **Companies House key (DONE 2026-10-16: authenticates, HTTP 200).** Worker reads `COMPANIES_HOUSE_API_KEY`. It was added to the cloud environment after the session started, so it was not visible; a new session should see it.
    Next step: test one lookup, then enumerate architecture firms by SIC 71111 to find firms not yet researched (avoids the web-search cap that limited round 2).
+   Result: `supabase/seed/round3/companies_house_candidates_2026-10-16.csv` lists 372 active SIC 71111 companies (14 West/East Sussex search areas) not matched to the repo by number or name.
+   Caveats: most are 1-person shells with no size/website/careers data; only a minority of seeded rows carry a CH number so name matching is fuzzy; some are not architecture (surveyors, yacht design). Needs triage and web research before loading.
 2. **Indeed.** Connector hit a rate limit and then disconnected. Found about 22 plausible roles in ~45 searches; none saved to the database. Checked in full:
    ADF Scaffold Design (Graduate Revit/Scaffold technician, London, from £29k), Evoke (CAD and Technical Assistant, Wallington, £13-16/h part time),
    Tiny House Pro (Potters Bar, £20k), Witcher Crawford (Winchester; needs several years' experience, so a speculative target only).
