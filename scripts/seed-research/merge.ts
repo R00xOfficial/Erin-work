@@ -201,6 +201,27 @@ mkdirSync(batchDir, { recursive: true });
 for (let i = 0; i < final.length; i += 50) {
   writeFileSync(join(batchDir, `batch_${String(i / 50 + 1).padStart(2, "0")}.sql`), final.slice(i, i + 50).map(sqlFor).join("\n\n") + "\n");
 }
+// Compact loaders: the same rows as the full SQL, as JSON inside one DO block per chunk. Used to load through
+// SQL APIs with request-size limits. Produces identical employer/office ids; source ids are looked up by url_hash.
+const compact = (r: Clean) => {
+  const evidenceCanon = r.entry_level_evidence_url ? canonicaliseUrl(r.entry_level_evidence_url) : null;
+  const ch = r.companies_house_number && /^[A-Z0-9]{2,8}$/i.test(r.companies_house_number.trim()) ? r.companies_house_number.trim().toUpperCase() : null;
+  const lower = (v: string[] | null | undefined) => (v ?? []).map((x) => String(x).trim().toLowerCase()).filter(Boolean).slice(0, 12);
+  return {
+    id: r.id, oid: r.officeId, n: r.name, dn: r.display_name ?? null, w: r.website, cu: r.careers_url ?? null, t: r.town, c: r.county ?? null,
+    pc: r.postcodeNorm, pt: r.practice_type, sb: r.size_band, sec: lower(r.sectors), sp: lower(r.specialisms), h: r.hires_part1,
+    ev: r.entry_level_evidence ?? null, evu: r.entry_level_evidence && evidenceCanon ? r.entry_level_evidence_url : null, evc: r.entry_level_evidence ? evidenceCanon : null,
+    ge: emailOk(r.generic_email, r.domain), ae: emailOk(r.applications_email, r.domain), ch, su: r.source_url ?? r.website, sc: r.sourceCanonical,
+    no: [r.notes, `Researched ${RESEARCH_DATE} from the employer's own website (seed research, slice ${r.slice ?? "?"}).`].filter(Boolean).join(" "), cf: r.confidence,
+  };
+};
+const loaderBody = readFileSync(join(dirname(new URL(import.meta.url).pathname), "load_template.sql"), "utf8").replaceAll("__RESEARCH_DATE__", RESEARCH_DATE);
+const CHUNK = Number(process.env.LOAD_CHUNK ?? 140);
+for (let i = 0; i < final.length; i += CHUNK) {
+  const json = "[\n" + final.slice(i, i + CHUNK).map((r) => JSON.stringify(compact(r))).join(",\n") + "\n]";
+  if (json.includes("$j$")) throw new Error("dollar-quote tag collision");
+  writeFileSync(join(batchDir, `load_${String(i / CHUNK + 1).padStart(2, "0")}.sql`), loaderBody.replace("__JSON__", json));
+}
 const count = <K extends string>(f: (r: Clean) => K) => final.reduce<Record<string, number>>((m, r) => { const k = f(r); m[k] = (m[k] ?? 0) + 1; return m; }, {});
 const report = {
   research_date: RESEARCH_DATE, raw_records: raw.length, bad_json_lines: badLines, after_validation: cleaned.length, duplicates_merged: dupes, final: final.length,

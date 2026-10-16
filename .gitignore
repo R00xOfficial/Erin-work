@@ -15,3 +15,6 @@ supabase/.branches/
 *.log
 .turbo/
 .vercel
+
+# Generated per-batch loaders for the live load (regenerate with scripts/seed-research/merge.ts)
+supabase/seed/*.batches/

@@ -1,0 +1,112 @@
+{
+ "research_date": "2026-10-16",
+ "raw_records": 586,
+ "bad_json_lines": 0,
+ "after_validation": 583,
+ "duplicates_merged": 31,
+ "final": 552,
+ "dropped_count": 3,
+ "dropped_by_reason": {
+  "website not live": 1,
+  "confidence below 70": 2
+ },
+ "by_zone": {
+  "A": 323,
+  "B": 79,
+  "C": 60,
+  "EXT": 81,
+  "OUT": 9
+ },
+ "by_practice_type": {
+  "architecture_practice": 353,
+  "interior_workplace_design": 15,
+  "multidisciplinary_consultancy": 27,
+  "other": 3,
+  "specialist_consultancy": 11,
+  "bim_visualisation_studio": 10,
+  "construction_design_build": 18,
+  "commercial_developer": 7,
+  "residential_developer": 14,
+  "housing_association": 16,
+  "local_authority": 29,
+  "planning_consultancy": 18,
+  "building_surveying": 7,
+  "urban_design_masterplanning": 5,
+  "heritage_conservation": 7,
+  "architectural_technologists": 12
+ },
+ "by_slice": {
+  "1": 73,
+  "2": 68,
+  "3": 67,
+  "4": 67,
+  "5": 56,
+  "6": 51,
+  "7": 55,
+  "8": 55,
+  "9": 31,
+  "10": 29
+ },
+ "with_postcode": 538,
+ "with_entry_evidence": 189,
+ "with_generic_or_apps_email": 383,
+ "fuzzy_name_pairs": [
+  {
+   "a": "HLM Architects",
+   "b": "Mæ Architects",
+   "similarity": 0.87
+  },
+  {
+   "a": "Hopkins Architects",
+   "b": "Sanei Hopkins Architects Ltd",
+   "similarity": 0.87
+  },
+  {
+   "a": "WGP Architects",
+   "b": "HGP Architects",
+   "similarity": 0.88
+  },
+  {
+   "a": "Adapt Architecture Limited",
+   "b": "ADAM Architecture",
+   "similarity": 0.87
+  },
+  {
+   "a": "MB Architecture",
+   "b": "OB Architecture Ltd",
+   "similarity": 0.88
+  },
+  {
+   "a": "MBH Design Studio Ltd",
+   "b": "Morph Design Studio",
+   "similarity": 0.85
+  },
+  {
+   "a": "OSP Architecture",
+   "b": "OB Architecture Ltd",
+   "similarity": 0.86
+  },
+  {
+   "a": "Lindley Architecture Ltd",
+   "b": "Lilley Architecture Ltd",
+   "similarity": 0.88
+  }
+ ],
+ "dropped": [
+  {
+   "name": "London Borough of Hammersmith & Fulham",
+   "reason": "website not live (HTTP 404)",
+   "slice": 3
+  },
+  {
+   "name": "VECA Architects Ltd",
+   "reason": "confidence below 70",
+   "slice": 5
+  },
+  {
+   "name": "Guttfield Architecture",
+   "reason": "confidence below 70",
+   "slice": 6
+  }
+ ]
+}
