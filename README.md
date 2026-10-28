@@ -81,6 +81,8 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 2200 research_unmatched_vacancies | vacancies without a matched employer can be researched |
 | 2300 stage3_prioritise | priority items (recommendation vs Erin's manual decision), decision history, editable models, planner preferences, plan actions, in-app reminders |
 | 2400 stage3_recontact_reason | a recorded reason to approach an employer again before the cooldown |
+| 2500 stage4_enum_values | new application stages, notification kinds and activity types |
+| 2600 stage4_applications | confirmed-submission guard and frozen snapshot, checklist, drafts, follow-ups, interview/assessment fields, `origin` on activities, reusable snippets, `v_application_pipeline` |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries
@@ -140,6 +142,29 @@ Opportunities saved for Stage 3 get a **priority item** (`/priorities`). Priorit
 - **Planner**: `planner.generate` fits suggested actions into your stated hours and weekly limits, books deadline work before the deadline and leaves
   the rest unscheduled with a reason. Accepted, edited, completed or dismissed actions are never touched. Effort figures are labelled estimates.
 - **Reminders**: `reminders.generate` creates in-app reminders only from stored dates, once each, with one daily/weekly summary. They are not emailed.
+
+## Stage 4: apply and follow up
+
+`/applications` is the pipeline (Preparing → Ready for review → Submitted → Awaiting response → Interviews and assessments → Offers and decisions → Closed),
+with a Tasks view and filters. Start one from a priority item, a vacancy or an employer (`/applications/new`), which shows earlier contact and requires a
+confirmation and a reason before a repeat approach.
+
+- **Nothing is assumed.** "Ready for review" means prepared. An application is only *submitted* when you fill in the submission form (date, method, recipient,
+  tick-box) or link a synchronised sent email; a database trigger refuses any post-submission stage without that confirmation, and refuses edits to the
+  documents, recipient or snapshot afterwards. A mistaken record is undone with "Correct the submission record" (reason kept in the timeline).
+  A vacancy disappearing is not an outcome; no-response and closed-listing outcomes are chosen by you.
+- **What was sent is frozen**: document versions (by SHA-256), cover letter, final drafts and answers are snapshotted at submission. Uploaded files are
+  never overwritten (the content hash is in the storage path) and are served only through `/api/documents/[id]` to a signed-in user with a one-minute link.
+- **Drafts** (cover letters, speculative emails, recruiter intros, answers, interview prep, follow-ups, thank-yous) use only approved facts: your approved
+  profile, approved snippets (Settings → Documents) and verified employer facts. Unsupported claims are flagged and must be checked before a draft is
+  marked final. A draft is not a message: "Prepare email for approval" puts it in the existing Outreach approval queue, and the usual stop switch,
+  suppression and caps still apply. Nothing in Stage 4 sends anything by itself.
+- **Follow-ups and reminders** (`followups.generate`, `reminders.generate`) come from an employer's stated timeframe, a date you set, or your configurable rule
+  (Settings → Planner), the last labelled as a suggestion and capped per application. Each links to its application and can be completed, rescheduled,
+  snoozed or dismissed.
+- **Timeline** merges logged and synchronised events, labelled "Logged by you" or "Synced". Manual logging works without any email integration.
+- **Backup**: Applications → Export downloads application history and a document manifest as JSON. Supabase free plans have no automatic database backups,
+  so keep an export and your original files.
 
 ## Daily routine
 

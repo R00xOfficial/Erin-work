@@ -30,6 +30,12 @@ export default async function PlannerSettings() {
         <div className="col-span-full flex flex-wrap gap-4">
           {([["remind_tasks_due", "Tasks due today"], ["remind_overdue", "Overdue or missed actions"], ["remind_decisions", "Decisions needed"], ["remind_status_changes", "Vacancy status changes"], ["remind_reconsider", "Holds due for reconsideration"], ["remind_outreach", "Planned outreach"]] as const).map(([k, l]) => <label key={k} className="flex items-center gap-2 m-0"><input type="checkbox" name={k} defaultChecked={(p as Record<string, unknown> | null)?.[k] !== false} /> {l}</label>)}
         </div>
+        <div className="col-span-full"><h2 className="font-semibold mt-2">Applications and follow-ups</h2><p className="muted text-xs">Follow-ups from these rules are always shown as suggestions. A timeframe the employer gave you takes priority, and nothing is ever sent for you.</p></div>
+        <div><label>Suggest a follow-up after (days with no reply)</label><input name="application_follow_up_days" type="number" min={1} defaultValue={p?.application_follow_up_days ?? 14} /></div>
+        <div><label>Maximum follow-ups per application</label><input name="max_follow_ups" type="number" min={0} defaultValue={p?.max_follow_ups ?? 2} /></div>
+        <div><label>Thank-you reminder after an interview (hours)</label><input name="thank_you_hours" type="number" min={1} defaultValue={p?.thank_you_hours ?? 24} /></div>
+        <div><label>Remind me about prepared-but-unsent applications after (days)</label><input name="prepared_not_submitted_days" type="number" min={1} defaultValue={p?.prepared_not_submitted_days ?? 3} /></div>
+        <div><label>Remind before an interview or assessment (hours)</label><input name="interview_remind_hours" type="number" min={1} defaultValue={p?.interview_remind_hours ?? 24} /></div>
         <div className="col-span-full"><button className="btn btn-primary" type="submit">Save</button> <span className="muted text-xs ml-2">Reminders appear on the Prioritise page; they are not emailed.</span></div>
       </form>
 

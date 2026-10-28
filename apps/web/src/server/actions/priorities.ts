@@ -172,6 +172,7 @@ export async function refreshPlan() { await requestJob("planner.generate", { rea
 
 export async function markNotificationRead(id: string) { const { supabase } = await requireUser(); await supabase.from("notifications").update({ read_at: nowIso() }).eq("id", id); refresh(); }
 export async function dismissNotification(id: string) { const { supabase } = await requireUser(); await supabase.from("notifications").update({ dismissed_at: nowIso(), read_at: nowIso() }).eq("id", id); refresh(); }
+export async function snoozeNotification(id: string, days: number) { const { supabase } = await requireUser(); await supabase.from("notifications").update({ snoozed_until: new Date(Date.now() + days * 86_400_000).toISOString() }).eq("id", id); refresh(); }
 export async function dismissAllNotifications() { const { supabase } = await requireUser(); await supabase.from("notifications").update({ dismissed_at: nowIso(), read_at: nowIso() }).is("dismissed_at", null); refresh(); }
 
 // ---- Settings ----------------------------------------------------------------------------------------------------
@@ -187,6 +188,7 @@ export async function savePlannerPrefs(formData: FormData) {
     remind_tasks_due: formData.get("remind_tasks_due") === "on", remind_overdue: formData.get("remind_overdue") === "on", remind_decisions: formData.get("remind_decisions") === "on",
     remind_status_changes: formData.get("remind_status_changes") === "on", remind_reconsider: formData.get("remind_reconsider") === "on", remind_outreach: formData.get("remind_outreach") === "on",
     digest_frequency: ["daily", "weekly", "off"].includes(s(formData, "digest_frequency") ?? "") ? s(formData, "digest_frequency")! : "daily", digest_hour: num("digest_hour", 0, 23),
+    application_follow_up_days: num("application_follow_up_days", 1, 180), max_follow_ups: num("max_follow_ups", 0, 10), thank_you_hours: num("thank_you_hours", 1, 240), prepared_not_submitted_days: num("prepared_not_submitted_days", 1, 60), interview_remind_hours: num("interview_remind_hours", 1, 240),
   }).eq("id", true);
   if (error) throw new Error(`Could not save: ${error.message}`);
   await requestJob("priorities.recompute", { all: true, reason: "planner preferences changed" }, "prio:all");

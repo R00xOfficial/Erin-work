@@ -44,7 +44,7 @@ export default async function PriorityDetail({ params }: { params: Promise<{ id:
           <PriorityBadge status={p.status} manual={manual} />
           {p.pinned && <span className="badge badge-accent">pinned</span>}{p.favourite && <span className="badge">★ favourite</span>}
           {!p.live && <span className="badge badge-danger">not live</span>}
-          <Link className="underline" href={researchHref}>Research &amp; assessment</Link><Link className="underline" href={recordHref}>Record</Link>
+          <Link className="underline" href={researchHref}>Research &amp; assessment</Link><Link className="underline" href={recordHref}>Record</Link>{p.live && <Link className="btn btn-sm btn-primary" href={`/applications/new?priority_item_id=${p.id}`}>Start application</Link>}
         </div>
       </div>
 

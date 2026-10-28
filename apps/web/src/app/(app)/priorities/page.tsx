@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/supabase/server";
 import { fmtDate, fmtDateTime, humanise } from "@/lib/utils";
 import { Deadline, ItemLink, PriorityBadge, ScorePair, Warnings } from "@/components/priorities/bits";
 import {
-  acceptAction, addAction, completeAction, dismissAction, dismissAllNotifications, dismissNotification, editAction, followRecommendation, markNotificationRead, promoteItem, refreshPlan, rescheduleAction, togglePin, toggleFavourite,
+  acceptAction, addAction, completeAction, dismissAction, dismissAllNotifications, dismissNotification, editAction, followRecommendation, markNotificationRead, snoozeNotification, promoteItem, refreshPlan, rescheduleAction, togglePin, toggleFavourite,
 } from "@/server/actions/priorities";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function PrioritiesPage({ searchParams }: { searchParams: P
   const { supabase } = await requireUser();
   const [{ data: c }, { data: notes }] = await Promise.all([
     supabase.from("v_stage3_counts").select("*").maybeSingle(),
-    supabase.from("notifications").select("*").is("dismissed_at", null).order("created_at", { ascending: false }).limit(30),
+    supabase.from("notifications").select("*").is("dismissed_at", null).or(`snoozed_until.is.null,snoozed_until.lt.${new Date().toISOString()}`).order("created_at", { ascending: false }).limit(30),
   ]);
   const unread = (notes ?? []).filter((n) => !n.read_at);
   const digest = (notes ?? []).find((n) => n.kind === "digest");
@@ -62,12 +62,12 @@ export default async function PrioritiesPage({ searchParams }: { searchParams: P
 function Tile({ label, value, to }: { label: string; value: number | null | undefined; to: string }) {
   return <Link href={to} className="card block hover:bg-surface-2"><div className="text-2xl font-semibold">{value ?? "—"}</div><div className="muted text-xs">{label}</div></Link>;
 }
-function Note({ n, urgent }: { n: { id: string; title: string; body: string | null; due_at: string | null; item_id: string | null }; urgent?: boolean }) {
+function Note({ n, urgent }: { n: { id: string; title: string; body: string | null; due_at: string | null; item_id: string | null; application_id?: string | null }; urgent?: boolean }) {
   return (
     <div className="text-sm flex flex-wrap items-center gap-2">
       <span className={urgent ? "text-danger font-medium" : ""}>{n.title}</span>{n.body && <span className="muted">{n.body}</span>}
-      {n.item_id && <Link className="underline" href={`/priorities/${n.item_id}`}>Open</Link>}
-      <form action={dismissNotification.bind(null, n.id)} className="ml-auto"><button className="btn btn-sm">Dismiss</button></form>
+      {n.application_id ? <Link className="underline" href={`/applications/${n.application_id}`}>Open application</Link> : n.item_id && <Link className="underline" href={`/priorities/${n.item_id}`}>Open</Link>}
+      <span className="ml-auto flex gap-1"><form action={snoozeNotification.bind(null, n.id, 3)}><button className="btn btn-sm">Snooze 3d</button></form><form action={dismissNotification.bind(null, n.id)}><button className="btn btn-sm">Dismiss</button></form></span>
     </div>
   );
 }
