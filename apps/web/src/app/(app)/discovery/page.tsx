@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EMPLOYMENT_TYPES, PRACTICE_TYPES, ROLE_FAMILIES, SENIORITIES } from "@ajis/shared";
+import { ELIGIBILITY_STATUSES, EMPLOYMENT_TYPES, PRACTICE_TYPES, ROLE_FAMILIES, SENIORITIES } from "@ajis/shared";
 import { requireUser } from "@/lib/supabase/server";
 import { fmtDate, fmtDateTime, fmtMoney, humanise } from "@/lib/utils";
 import { BandBadge, EligibilityBadge, StatusBadge } from "@/components/badges";
@@ -115,6 +115,7 @@ async function VacanciesView({ sp, page }: { sp: SP; page: number }) {
   if (sp.kind === "core") q = q.eq("is_adjacent", false);
   if (sp.kind === "adjacent") q = q.eq("is_adjacent", true);
   if (sp.family) q = q.eq("role_family", sp.family as EnumOf<typeof ROLE_FAMILIES>);
+  if (sp.eligibility) q = q.eq("eligibility_status", sp.eligibility as EnumOf<typeof ELIGIBILITY_STATUSES>);
   if (sp.type) q = q.eq("employment_type", sp.type as EnumOf<typeof EMPLOYMENT_TYPES>);
   if (sp.level) q = q.eq("seniority", sp.level as EnumOf<typeof SENIORITIES>);
   if (sp.zone) q = q.eq("zone_code", sp.zone);
@@ -136,6 +137,7 @@ async function VacanciesView({ sp, page }: { sp: SP; page: number }) {
         <select name="status" defaultValue={sp.status ?? ""}><option value="">Open / unverified</option><option value="ended">Closed / filled / withdrawn</option><option value="all">Any status</option></select>
         <select name="kind" defaultValue={sp.kind ?? ""}><option value="">Core + adjacent</option><option value="core">Core architecture</option><option value="adjacent">Adjacent routes</option></select>
         <select name="family" defaultValue={sp.family ?? ""}><option value="">Any role</option>{ROLE_FAMILIES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
+        <select name="eligibility" defaultValue={sp.eligibility ?? ""}><option value="">Any eligibility</option>{ELIGIBILITY_STATUSES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
         <select name="level" defaultValue={sp.level ?? ""}><option value="">Any level</option>{SENIORITIES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
         <select name="type" defaultValue={sp.type ?? ""}><option value="">Any contract</option>{EMPLOYMENT_TYPES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
         <select name="zone" defaultValue={sp.zone ?? ""}><option value="">Any zone</option>{ZONES.map((z) => <option key={z} value={z}>Zone {z}</option>)}</select>

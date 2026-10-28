@@ -21,6 +21,8 @@ export interface StructuredRunOptions<T> {
   user: string;
   schema: z.ZodType<T>;
   maxTokens?: number;
+  /** Count only runs of this entity type against a separate daily cap read from this settings key. */
+  cap?: { entityType: string; settingKey: string; fallback: number };
 }
 
 export type StructuredRunResult<T> = { ok: true; data: T; runId: string; cached: boolean } | { ok: false; reason: string; runId?: string };
@@ -40,8 +42,10 @@ export async function runStructured<T>(opts: StructuredRunOptions<T>): Promise<S
     const parsed = opts.schema.safeParse(existing.output);
     if (parsed.success) return { ok: true, data: parsed.data, runId: existing.id, cached: true };
   }
-  const cap = await getSetting<number>("ai_daily_cap", 40);
-  const { count } = await db().from("ai_runs").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 86_400_000).toISOString()).neq("status", "rejected_by_validation");
+  const cap = await getSetting<number>(opts.cap?.settingKey ?? "ai_daily_cap", opts.cap?.fallback ?? 40);
+  let capQuery = db().from("ai_runs").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 86_400_000).toISOString()).neq("status", "rejected_by_validation");
+  capQuery = opts.cap ? capQuery.eq("entity_type", opts.cap.entityType) : capQuery.neq("entity_type", "careers_page");
+  const { count } = await capQuery;
   if ((count ?? 0) >= cap) return { ok: false, reason: `AI daily cap (${cap}) reached` };
 
   const { data: run, error } = existing

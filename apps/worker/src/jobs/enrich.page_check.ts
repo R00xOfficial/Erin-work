@@ -12,6 +12,7 @@ const MIN_INTERVAL_H = 6, MAX_INTERVAL_D = 14;
  * Changed-page detection for tracked sources (careers pages, vacancy listings, practice homepages).
  * ETag / If-Modified-Since → 304 doubles the interval (max 14 d); a content change halves it (min 6 h),
  * stores a snapshot hash and raises a careers_page_changed signal + downstream extraction for vacancies.
+ * Sources with source_kind = careers_page are owned by discovery.careers_pages instead and skipped here.
  */
 export async function checkSource(sourceId: string) {
   const { data: s } = await db().from("sources").select("*").eq("id", sourceId).maybeSingle();
@@ -78,7 +79,7 @@ function parseIntervalHours(v: unknown): number | null {
 
 export async function enrichPageCheck(job: Job<Payload>) {
   if (job.data.sourceId) return checkSource(job.data.sourceId);
-  const { data: due } = await db().from("sources").select("id").neq("fetch_status", "disabled").or(`next_check_at.is.null,next_check_at.lte.${new Date().toISOString()}`).not("entity_type", "is", null).order("next_check_at", { ascending: true, nullsFirst: true }).limit(job.data.limit ?? 50);
+  const { data: due } = await db().from("sources").select("id").neq("fetch_status", "disabled").or(`and(source_kind.is.null,next_check_at.is.null),and(source_kind.is.null,next_check_at.lte.%s),and(source_kind.neq.careers_page,next_check_at.is.null),and(source_kind.neq.careers_page,next_check_at.lte.%s)`.replaceAll("%s", new Date().toISOString())).not("entity_type", "is", null).order("next_check_at", { ascending: true, nullsFirst: true }).limit(job.data.limit ?? 50);
   const out: unknown[] = [];
   for (const s of due ?? []) {
     try { out.push(await checkSource(s.id)); } catch (e) { logger.warn({ sourceId: s.id, err: (e as Error).message }, "page check failed"); await db().from("sources").update({ fetch_status: "error", fetch_error: (e as Error).message, next_check_at: new Date(Date.now() + 86_400_000).toISOString() }).eq("id", s.id); }

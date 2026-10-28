@@ -17,6 +17,7 @@ export * from "./crypto/aes.js";
 export * from "./schemas/evidence.js";
 export * from "./schemas/briefing.js";
 export * from "./schemas/vacancyExtraction.js";
+export * from "./schemas/careersExtraction.js";
 export * from "./schemas/profile.js";
 export * from "./schemas/settings.js";
 export * from "./schemas/inputs.js";

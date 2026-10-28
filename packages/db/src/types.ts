@@ -2450,6 +2450,8 @@ export type Database = {
           http_status: number | null
           id: string
           last_changed_at: string | null
+          last_extracted_at: string | null
+          last_extracted_hash: string | null
           last_fetched_at: string | null
           last_modified: string | null
           next_check_at: string | null
@@ -2484,6 +2486,8 @@ export type Database = {
           http_status?: number | null
           id?: string
           last_changed_at?: string | null
+          last_extracted_at?: string | null
+          last_extracted_hash?: string | null
           last_fetched_at?: string | null
           last_modified?: string | null
           next_check_at?: string | null
@@ -2518,6 +2522,8 @@ export type Database = {
           http_status?: number | null
           id?: string
           last_changed_at?: string | null
+          last_extracted_at?: string | null
+          last_extracted_hash?: string | null
           last_fetched_at?: string | null
           last_modified?: string | null
           next_check_at?: string | null

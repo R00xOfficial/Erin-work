@@ -26,6 +26,7 @@ export const QUEUES: QueueDef[] = [
   { name: "discovery.jobsgopublic", policy: "singleton", cron: "55 3 * * *", retryLimit: 1, expireInSeconds: 1800 },
   { name: "discovery.aj_jobs", policy: "singleton", cron: "0 4 * * *", retryLimit: 1, expireInSeconds: 1800 },
   { name: "discovery.planit", policy: "singleton", cron: "50 2 * * *", retryLimit: 1, expireInSeconds: 1800 },
+  { name: "discovery.careers_pages", policy: "singleton", cron: "15 5 * * *", retryLimit: 1, expireInSeconds: 3300 },
   { name: "discovery.email_alerts", policy: "standard", retryLimit: 2 },
   // enrichment
   { name: "enrich.companies_house", policy: "stately", cron: "0 4 * * 1", retryLimit: 3, scheduleData: { all: true } },

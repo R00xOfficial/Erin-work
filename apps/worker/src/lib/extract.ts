@@ -76,3 +76,22 @@ export function findCareersLink(html: string, baseUrl: string): { url: string; t
   });
   return best ? { url: (best as { url: string }).url, text: (best as { text: string }).text } : null;
 }
+
+/** Anchors on a page with their visible text, for http(s) links only. Used to give the model real URLs to choose from. */
+export function extractAnchors(html: string, baseUrl: string): { text: string; url: string }[] {
+  const $ = cheerio.load(html);
+  const out = new Map<string, string>();
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href");
+    if (!href || /^(mailto|tel|javascript):/i.test(href)) return;
+    try {
+      const u = new URL(href, baseUrl);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return;
+      u.hash = "";
+      const text = $(el).text().replace(/\s+/g, " ").trim().slice(0, 100);
+      const url = u.toString();
+      if (!out.has(url) || (!out.get(url) && text)) out.set(url, text);
+    } catch { /* ignore */ }
+  });
+  return [...out].map(([url, text]) => ({ url, text }));
+}

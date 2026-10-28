@@ -20,7 +20,7 @@ async function employerCandidates(): Promise<EmployerCandidate[]> {
  * employer match → eligibility → enqueue extraction + scoring. Running the same source twice
  * never creates a second row.
  */
-export async function ingestVacancy(raw: RawVacancy, src: { sourceDefinitionId: string; sourceCode: string; sourceRunId: string | null; evidenceType?: "job_board" | "recruiter" | "primary_official" }): Promise<IngestOutcome> {
+export async function ingestVacancy(raw: RawVacancy, src: { employerId?: string; sourceDefinitionId: string; sourceCode: string; sourceRunId: string | null; evidenceType?: "job_board" | "recruiter" | "primary_official" }): Promise<IngestOutcome> {
   const canon = canonicaliseUrl(raw.url);
   if (!canon || !raw.title?.trim()) return { outcome: "rejected", reason: "missing url or title" };
   const hash = urlHash(canon);
@@ -55,6 +55,7 @@ export async function ingestVacancy(raw: RawVacancy, src: { sourceDefinitionId: 
     else if (m.kind === "fuzzy") { matchStatus = "pending"; }
     if (raw.postedByAgency && employerId) { agencyId = employerId; employerId = null; matchStatus = "agency_anonymised"; }
   }
+  if (src.employerId && !raw.postedByAgency) { employerId = src.employerId; matchStatus = "matched"; }
   // Cross-source duplicate within the window
   const fingerprint = vacancyFingerprint({ employerName: raw.employerName, title: raw.title, postcode: raw.postcode, town: raw.locationText });
   const since = new Date(Date.now() - VACANCY_DEDUP_WINDOW_DAYS * 86_400_000).toISOString();
