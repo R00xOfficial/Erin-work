@@ -11,7 +11,6 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 const LIVE = ["open", "closing_soon", "unverified"] as const;
 const ENDED = ["closed", "filled", "withdrawn"] as const;
-const ZONES = ["A", "B", "C", "EXT", "OUT"];
 
 type SP = Record<string, string | undefined>;
 type EnumOf<T extends readonly string[]> = T[number];
@@ -104,6 +103,7 @@ const STATE_OPTIONS = (
 
 async function VacanciesView({ sp, page }: { sp: SP; page: number }) {
   const { supabase } = await requireUser();
+  const { data: zoneRows } = await supabase.from("geo_zones").select("code, label").order("sort_order");
   let q = supabase.from("v_discovery_vacancies").select("*", { count: "exact" }).order("first_seen_at", { ascending: false }).range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (sp.q) q = q.textSearch("search_vector", sp.q, { type: "websearch", config: "english" });
   if (sp.state === "new" || sp.state === "saved" || sp.state === "dismissed") q = q.eq("discovery_state", sp.state);
@@ -140,7 +140,7 @@ async function VacanciesView({ sp, page }: { sp: SP; page: number }) {
         <select name="eligibility" defaultValue={sp.eligibility ?? ""}><option value="">Any eligibility</option>{ELIGIBILITY_STATUSES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
         <select name="level" defaultValue={sp.level ?? ""}><option value="">Any level</option>{SENIORITIES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
         <select name="type" defaultValue={sp.type ?? ""}><option value="">Any contract</option>{EMPLOYMENT_TYPES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}</select>
-        <select name="zone" defaultValue={sp.zone ?? ""}><option value="">Any zone</option>{ZONES.map((z) => <option key={z} value={z}>Zone {z}</option>)}</select>
+        <select name="zone" defaultValue={sp.zone ?? ""}><option value="">Any zone</option>{(zoneRows ?? []).map((z) => <option key={z.code} value={z.code}>{z.label}</option>)}</select>
         <input name="salary" type="number" min={0} step={1000} placeholder="Min salary £/yr (known only)" defaultValue={sp.salary ?? ""} />
         <input name="travel" type="number" min={0} step={5} placeholder="Max travel mins (known only)" defaultValue={sp.travel ?? ""} />
         <select name="found" defaultValue={sp.found ?? ""}><option value="">Found any time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
@@ -204,6 +204,7 @@ async function VacanciesView({ sp, page }: { sp: SP; page: number }) {
 
 async function EmployersView({ sp, page }: { sp: SP; page: number }) {
   const { supabase } = await requireUser();
+  const { data: zoneRows } = await supabase.from("geo_zones").select("code, label").order("sort_order");
   let q = supabase.from("v_discovery_employers").select("*", { count: "exact" }).order("latest_score", { ascending: false, nullsFirst: false }).order("name").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (sp.q) q = q.textSearch("search_vector", sp.q, { type: "websearch", config: "english" });
   if (sp.state === "new" || sp.state === "saved" || sp.state === "dismissed") q = q.eq("discovery_state", sp.state);
@@ -237,7 +238,7 @@ async function EmployersView({ sp, page }: { sp: SP; page: number }) {
         <select name="advert" defaultValue={sp.advert ?? ""}><option value="">Advertising or not</option><option value="advertising">Has an open vacancy</option><option value="speculative">No vacancy (speculative target)</option></select>
         <select name="type" defaultValue={sp.type ?? ""}><option value="">Any category</option>{PRACTICE_TYPES.map((t) => <option key={t} value={t}>{humanise(t)}</option>)}</select>
         <select name="specialism" defaultValue={sp.specialism ?? ""}><option value="">Any specialism</option>{specialisms.map((t) => <option key={t} value={t}>{t}</option>)}</select>
-        <select name="zone" defaultValue={sp.zone ?? ""}><option value="">Any zone</option>{ZONES.map((z) => <option key={z} value={z}>Zone {z}</option>)}</select>
+        <select name="zone" defaultValue={sp.zone ?? ""}><option value="">Any zone</option>{(zoneRows ?? []).map((z) => <option key={z.code} value={z.code}>{z.label}</option>)}</select>
         <input name="travel" type="number" min={0} step={5} placeholder="Max travel mins (known only)" defaultValue={sp.travel ?? ""} />
         <select name="found" defaultValue={sp.found ?? ""}><option value="">Added any time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
         <select name="checked" defaultValue={sp.checked ?? ""}><option value="">Checked any time</option><option value="never">Never checked</option><option value="stale">Not checked in 30 days</option></select>

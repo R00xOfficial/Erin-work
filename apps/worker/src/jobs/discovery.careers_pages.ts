@@ -196,15 +196,23 @@ export async function discoverCareersPages(job: Job<Payload>) {
   const runId = run?.id ?? null;
   const counts: Counts = { pages: 0, requests: 0, seen: 0, created: 0, updated: 0, duplicate: 0, rejected: 0, unchanged: 0, failed: 0, blocked: 0, unreadable: 0, unverified: 0, closed: 0 };
   const errors: unknown[] = [];
-  for (const s of due ?? []) {
-    try {
-      if ((await processSource(s as SourceRow, def, runId, counts, errors)) === "stop") break;
-    } catch (e) {
-      counts.failed++;
-      errors.push({ page: s.url, error: (e as Error).message });
-      logger.warn({ page: s.url, err: (e as Error).message }, "careers page failed");
+  // Bounded concurrency: pages on different hosts run side by side; politeFetch still spaces requests per host and honours robots.txt.
+  const queue = [...(due ?? [])];
+  const concurrency = Math.max(1, Math.min(8, Number((def.config as { concurrency?: number } | null)?.concurrency ?? 4)));
+  let stop = false;
+  await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+    while (!stop) {
+      const s = queue.shift();
+      if (!s) break;
+      try {
+        if ((await processSource(s as SourceRow, def, runId, counts, errors)) === "stop") stop = true;
+      } catch (e) {
+        counts.failed++;
+        errors.push({ page: s.url, error: (e as Error).message });
+        logger.warn({ page: s.url, err: (e as Error).message }, "careers page failed");
+      }
     }
-  }
+  }));
   const processed = counts.pages;
   const status = processed > 0 && counts.failed + counts.blocked + counts.unreadable === processed ? "failed" : errors.length ? "partial" : "succeeded";
   await db().from("source_runs").update({ status, finished_at: iso(), items_seen: counts.seen, items_new: counts.created, items_changed: counts.updated, items_deduped: counts.duplicate, requests_made: counts.requests, errors: errors.slice(0, 50) as never }).eq("id", runId ?? "");

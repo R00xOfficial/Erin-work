@@ -76,6 +76,7 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 1700 discovery_state | Stage 1 triage state (new / saved / dismissed, separate from vacancy status), adjacent-role flag, `v_discovery_*` views behind the Discovery page |
 | 1800 careers_search | `employers.careers_search_at`: when the worker last looked for a careers page |
 | 1900 careers_extraction | `careers_pages` source definition and per-page extraction state on `sources` |
+| 2000 careers_data_quality | careers-page data-quality checks; careers source reads 60 pages a run, 4 at a time |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries
@@ -125,7 +126,8 @@ switch off. Publicly available contact details do not remove these obligations.
 
 - **Worker (Railway):** build from `apps/worker/Dockerfile` with the repo root as context; set every variable
   from `.env.example`; `SUPABASE_DB_URL` must be the session pooler URL. One replica only (pg-boss schedules).
-- **Web:** `pnpm --filter @ajis/web build`; run on Railway or Vercel with the Supabase keys and Google OAuth
-  variables; add the deployed callback URL to the Google OAuth client.
+- **Web (Railway):** build from `apps/web/Dockerfile` with the repo root as context. `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be set as service variables before the build (they are inlined into the bundle).
+  Health check: `/api/health`. Add the deployed callback URL to the Google OAuth client.
 - **Gmail:** apps in Google's *Testing* publishing state expire grants after 7 days; when that happens the
   worker marks the credential `needs_reauth`, creates a task and halts sending until you reconnect.
