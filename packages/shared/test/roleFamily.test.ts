@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyTitle, experienceYearsFromText, qualificationFromText } from "../src/index.js";
+import { classifyTitle, experienceYearsFromText, isAdjacentFamily, qualificationFromText } from "../src/index.js";
 
 describe("classifyTitle", () => {
   it("separates Part 1 / Part 2 / Part 3", () => {
@@ -34,5 +34,12 @@ describe("text extraction", () => {
     expect(qualificationFromText("Part 1 graduates welcome")).toBe("part1");
     expect(experienceYearsFromText("minimum 3 years' relevant experience")).toBe(3);
     expect(experienceYearsFromText("no experience required")).toBeNull();
+  });
+});
+
+describe("isAdjacentFamily", () => {
+  it("keeps core architecture roles apart from adjacent routes", () => {
+    for (const t of ["Part 1 Architectural Assistant", "Graduate Architectural Assistant", "Architecture Placement Student"]) expect(isAdjacentFamily(classifyTitle(t).family)).toBe(false);
+    for (const t of ["Junior BIM Technician", "Graduate Planning Assistant", "Junior CAD Technician"]) expect(isAdjacentFamily(classifyTitle(t).family)).toBe(true);
   });
 });

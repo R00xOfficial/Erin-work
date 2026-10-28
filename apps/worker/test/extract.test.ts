@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractEmails, extractLinks, extractMainText } from "../src/lib/extract.js";
+import { extractEmails, extractLinks, extractMainText, findCareersLink } from "../src/lib/extract.js";
 
 const html = `<html><head><title>Careers — Example Architects</title></head><body>
 <nav><a href="/about">About</a></nav>
@@ -21,5 +21,16 @@ describe("extract", () => {
   });
   it("finds business emails", () => {
     expect(extractEmails(html)).toEqual(expect.arrayContaining(["jobs@example.co.uk", "careers@example.co.uk"]));
+  });
+
+  it("finds the careers link on a practice homepage and ignores off-site and unrelated links", () => {
+    const home = `<nav><a href="/projects">Projects</a><a href="https://www.facebook.com/jobs">Jobs on Facebook</a>
+      <a href="/studio/careers/">Careers</a><a href="/news/we-are-hiring-blog-post-about-careers-advice">News</a></nav>`;
+    expect(findCareersLink(home, "https://www.example.co.uk/")).toEqual({ url: "https://www.example.co.uk/studio/careers/", text: "Careers" });
+    expect(findCareersLink(`<a href="/projects">Projects</a>`, "https://www.example.co.uk/")).toBeNull();
+  });
+  it("accepts a known applicant-tracking host linked from the practice site", () => {
+    const home = `<a href="https://example.bamboohr.com/careers">Vacancies</a>`;
+    expect(findCareersLink(home, "https://example.co.uk")?.url).toBe("https://example.bamboohr.com/careers");
   });
 });

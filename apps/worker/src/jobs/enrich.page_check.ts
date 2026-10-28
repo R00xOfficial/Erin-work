@@ -56,7 +56,7 @@ export async function checkSource(sourceId: string) {
     if (first || changed) await db().from("job_requests").insert({ job_name: "ai.vacancy_extract", payload: { vacancyId: s.entity_id }, singleton_key: `extract:${s.entity_id}` });
   }
   if (changed && s.entity_type === "employer" && s.entity_id) {
-    const isCareers = /career|job|vacanc|join|recruit|work-with-us|opportunit/i.test(url);
+    const isCareers = s.source_kind === "careers_page" || /career|job|vacanc|join|recruit|work-with-us|opportunit/i.test(url);
     await db().from("hiring_signals").upsert({ employer_id: s.entity_id, signal_type: isCareers ? "careers_page_changed" : "press", strength: isCareers ? "moderate" : "weak", summary: `${isCareers ? "Careers page" : "Tracked page"} changed: ${title ?? url}`, source_id: sourceId, evidence_status: "verified_fact" }, { onConflict: "employer_id,signal_type,source_id,observed_on", ignoreDuplicates: true });
     await db().from("tasks").insert({ title: `Tracked page changed — re-check ${extractDomain(url) ?? url}`, task_type: "research", entity_type: "employer", entity_id: s.entity_id, employer_id: s.entity_id, auto_generated: true, dedupe_key: `page_changed:${sourceId}`, priority: isCareers ? "high" : "low" });
     await db().from("job_requests").insert({ job_name: "scoring.recompute", payload: { employerId: s.entity_id }, singleton_key: `score:${s.entity_id}` });

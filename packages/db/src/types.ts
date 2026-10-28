@@ -1260,6 +1260,7 @@ export type Database = {
           applications_email: string | null
           business_signals: string | null
           business_signals_evidence: Database["public"]["Enums"]["evidence_status"]
+          careers_search_at: string | null
           careers_url: string | null
           ciat_relationship: string | null
           client_types: string[]
@@ -1340,6 +1341,7 @@ export type Database = {
           applications_email?: string | null
           business_signals?: string | null
           business_signals_evidence?: Database["public"]["Enums"]["evidence_status"]
+          careers_search_at?: string | null
           careers_url?: string | null
           ciat_relationship?: string | null
           client_types?: string[]
@@ -1420,6 +1422,7 @@ export type Database = {
           applications_email?: string | null
           business_signals?: string | null
           business_signals_evidence?: Database["public"]["Enums"]["evidence_status"]
+          careers_search_at?: string | null
           careers_url?: string | null
           ciat_relationship?: string | null
           client_types?: string[]

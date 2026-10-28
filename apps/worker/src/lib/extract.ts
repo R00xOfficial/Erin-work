@@ -45,3 +45,34 @@ export function extractEmails(text: string): string[] {
   const m = text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) ?? [];
   return [...new Set(m.map((x) => x.toLowerCase()))].filter((x) => !/\.(png|jpg|svg|gif)$/.test(x));
 }
+
+const CAREERS_TEXT = /\b(careers?|vacanc(?:y|ies)|jobs?|join (?:us|our|the)|work (?:with|for) us|opportunit(?:y|ies)|recruitment)\b/i;
+const CAREERS_HREF = /(career|vacanc|\/jobs?\b|join-?(us|our|the)|work-?(with|for)-?us|opportunit|recruit)/i;
+const ATS_HOSTS = /(^|\.)(workable\.com|bamboohr\.com|teamtailor\.com|recruitee\.com|personio\.(de|com)|breezy\.hr|smartrecruiters\.com|greenhouse\.io|lever\.co|applytojob\.com|hireful\.co\.uk|cvlibrary\.co\.uk|pinpointhq\.com|jobs\.ashbyhq\.com)$/i;
+
+/**
+ * Finds the link on a practice's page most likely to be its careers / vacancies page. Only returns a link that is
+ * actually present in the page's anchors (never constructs a URL), and only on the same site or a known ATS host.
+ */
+export function findCareersLink(html: string, baseUrl: string): { url: string; text: string } | null {
+  const $ = cheerio.load(html);
+  const base = new URL(baseUrl);
+  const sameSite = (h: string) => h.replace(/^www\./, "") === base.hostname.replace(/^www\./, "");
+  let best: { url: string; text: string; score: number } | null = null;
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href");
+    if (!href || /^(mailto|tel|javascript):/i.test(href)) return;
+    let u: URL;
+    try { u = new URL(href, baseUrl); } catch { return; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return;
+    if (!sameSite(u.hostname) && !ATS_HOSTS.test(u.hostname)) return;
+    const text = $(el).text().replace(/\s+/g, " ").trim().slice(0, 80);
+    const textHit = text.length > 0 && text.length <= 40 && CAREERS_TEXT.test(text);
+    const hrefHit = CAREERS_HREF.test(u.pathname + u.hostname);
+    if (!textHit && !hrefHit) return;
+    u.hash = "";
+    const score = (textHit ? 3 : 0) + (hrefHit ? 2 : 0) + (ATS_HOSTS.test(u.hostname) ? 1 : 0) - Math.min(u.pathname.split("/").filter(Boolean).length, 4) * 0.25;
+    if (!best || score > best.score) best = { url: u.toString(), text, score };
+  });
+  return best ? { url: (best as { url: string }).url, text: (best as { text: string }).text } : null;
+}

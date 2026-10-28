@@ -31,6 +31,7 @@ export const QUEUES: QueueDef[] = [
   { name: "enrich.companies_house", policy: "stately", cron: "0 4 * * 1", retryLimit: 3, scheduleData: { all: true } },
   { name: "enrich.geocode", policy: "stately", retryLimit: 3 },
   { name: "enrich.travel_time", policy: "stately", cron: "0 5 1 * *", retryLimit: 3, scheduleData: { all: true, refresh: true } },
+  { name: "enrich.careers_pages", policy: "singleton", cron: "30 4 * * *", retryLimit: 1, expireInSeconds: 3000 },
   { name: "enrich.page_check", policy: "singleton", cron: "10 * * * *", retryLimit: 1, expireInSeconds: 1800 },
   // ai
   { name: "ai.employer_briefing", policy: "stately", retryLimit: 1, expireInSeconds: 600 },

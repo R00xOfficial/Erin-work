@@ -51,6 +51,16 @@ export function classifyTitle(title: string | null | undefined): TitleClassifica
   return { family: "unknown", impliedQualification: "unknown", entryLevel: false, matchedPattern: null };
 }
 
+const ADJACENT_FAMILIES: ReadonlySet<RoleFamily> = new Set<RoleFamily>(["technician", "technologist", "bim_cad", "design_coordinator", "planning_assistant", "urban_design_junior", "visualisation", "other_entry"]);
+
+/**
+ * True for entry-level routes that sit next to architecture (technician, BIM/CAD, planning, urban design, visualisation, ...)
+ * rather than the core Part 1 / graduate / placement architecture roles. Shown separately in Discovery so Erin can decide.
+ */
+export function isAdjacentFamily(family: RoleFamily): boolean {
+  return ADJACENT_FAMILIES.has(family);
+}
+
 /** Extract an explicit qualification requirement from description text, if the text states one. */
 export function qualificationFromText(text: string | null | undefined): QualificationRequired {
   if (!text) return "unknown";

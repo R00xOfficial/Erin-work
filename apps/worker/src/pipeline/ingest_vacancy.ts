@@ -1,4 +1,4 @@
-import { canonicaliseUrl, urlHash, vacancyFingerprint, normaliseTitle, classifyTitle, qualificationFromText, experienceYearsFromText, evaluateEligibility, matchEmployer, contentHash, VACANCY_DEDUP_WINDOW_DAYS, type EmployerCandidate, type EmploymentType } from "@ajis/shared";
+import { canonicaliseUrl, urlHash, vacancyFingerprint, normaliseTitle, classifyTitle, isAdjacentFamily, qualificationFromText, experienceYearsFromText, evaluateEligibility, matchEmployer, contentHash, VACANCY_DEDUP_WINDOW_DAYS, type EmployerCandidate, type EmploymentType } from "@ajis/shared";
 import type { TablesUpdate } from "@ajis/db";
 import { db } from "../lib/db.js";
 import type { RawVacancy } from "../adapters/types.js";
@@ -72,6 +72,7 @@ export async function ingestVacancy(raw: RawVacancy, src: { sourceDefinitionId: 
     title: raw.title.trim(),
     normalised_title: normaliseTitle(raw.title),
     role_family: cls.family,
+    is_adjacent: isAdjacentFamily(cls.family),
     canonical_url: canon,
     original_url: raw.url,
     source_definition_id: src.sourceDefinitionId,

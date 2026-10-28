@@ -8,6 +8,7 @@ import { enrichGeocode } from "./enrich.geocode.js";
 import { enrichTravelTime } from "./enrich.travel_time.js";
 import { enrichCompaniesHouse } from "./enrich.companies_house.js";
 import { enrichPageCheck } from "./enrich.page_check.js";
+import { enrichCareersPages } from "./enrich.careers_pages.js";
 import { aiEmployerBriefing } from "./ai.employer_briefing.js";
 import { aiVacancyExtract } from "./ai.vacancy_extract.js";
 import { discoveryJob } from "./discovery.js";
@@ -38,6 +39,7 @@ export const HANDLERS: Record<string, Handler> = {
   "enrich.geocode": enrichGeocode,
   "enrich.travel_time": enrichTravelTime,
   "enrich.page_check": enrichPageCheck,
+  "enrich.careers_pages": enrichCareersPages,
   "ai.employer_briefing": aiEmployerBriefing,
   "ai.vacancy_extract": aiVacancyExtract,
   "scoring.recompute": scoringRecompute,
@@ -51,7 +53,7 @@ export const HANDLERS: Record<string, Handler> = {
 };
 
 /** Fetch queues run one at a time per process so per-host rate limits hold. */
-const SERIAL = new Set(QUEUES.filter((q) => q.name.startsWith("discovery.") || q.name === "enrich.page_check" || q.name.startsWith("gmail.")).map((q) => q.name));
+const SERIAL = new Set(QUEUES.filter((q) => q.name.startsWith("discovery.") || q.name === "enrich.page_check" || q.name === "enrich.careers_pages" || q.name.startsWith("gmail.")).map((q) => q.name));
 
 export async function registerHandlers(boss: PgBoss) {
   for (const [name, handler] of Object.entries(HANDLERS)) {

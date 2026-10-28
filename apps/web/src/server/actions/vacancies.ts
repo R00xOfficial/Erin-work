@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { canonicaliseUrl, urlHash, vacancyInputSchema, vacancyFingerprint, classifyTitle, qualificationFromText, experienceYearsFromText, evaluateEligibility, normaliseTitle, normaliseCompanyName, type CandidateEligibilityProfile, type VacancyStatus, type EmploymentType } from "@ajis/shared";
+import { canonicaliseUrl, urlHash, vacancyInputSchema, vacancyFingerprint, classifyTitle, isAdjacentFamily, qualificationFromText, experienceYearsFromText, evaluateEligibility, normaliseTitle, normaliseCompanyName, type CandidateEligibilityProfile, type VacancyStatus, type EmploymentType } from "@ajis/shared";
 import type { TablesUpdate } from "@ajis/db";
 import { requireUser } from "@/lib/supabase/server";
 import { requestJob } from "@/server/actions/jobs";
@@ -72,6 +72,7 @@ export async function importVacancy(formData: FormData) {
     title: input.title,
     normalised_title: normaliseTitle(input.title),
     role_family: cls.family,
+    is_adjacent: isAdjacentFamily(cls.family),
     canonical_url: canon,
     original_url: input.url,
     source_id: src?.id ?? null,
@@ -150,7 +151,7 @@ export async function recheckEligibility(id: string) {
     employmentType: v.employment_type as EmploymentType, salaryMinGbpPerYear: salaryYear, requiresExistingRightToWork: v.right_to_work_required === true,
     publicTransportMinutes: pt, carMinutes: car, isRemote: v.hybrid_policy === "remote", employerSuppressed: (v.employers as { is_suppressed: boolean } | null)?.is_suppressed ?? false,
   }, profile);
-  await supabase.from("vacancies").update({ eligibility_status: elig.status, hard_flags: elig.hardFlags, eligibility_reasons: elig.reasons, eligibility_checked_at: new Date().toISOString(), role_family: classifyTitle(v.title).family }).eq("id", id);
+  await supabase.from("vacancies").update({ eligibility_status: elig.status, hard_flags: elig.hardFlags, eligibility_reasons: elig.reasons, eligibility_checked_at: new Date().toISOString(), role_family: classifyTitle(v.title).family, is_adjacent: isAdjacentFamily(classifyTitle(v.title).family) }).eq("id", id);
   revalidatePath(`/vacancies/${id}`);
 }
 
