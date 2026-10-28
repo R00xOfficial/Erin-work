@@ -26,3 +26,4 @@ export * from "./schemas/draftOutput.js";
 export * from "./schemas/profile.js";
 export * from "./schemas/settings.js";
 export * from "./schemas/inputs.js";
+export * from "./insights/index.js";

@@ -83,6 +83,7 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 2400 stage3_recontact_reason | a recorded reason to approach an employer again before the cooldown |
 | 2500 stage4_enum_values | new application stages, notification kinds and activity types |
 | 2600 stage4_applications | confirmed-submission guard and frozen snapshot, checklist, drafts, follow-ups, interview/assessment fields, `origin` on activities, reusable snippets, `v_application_pipeline` |
+| 2700 stage5_insights | `is_test` flags, versioned metric definitions, immutable saved reports, recommendations and their decision history, employer feedback vs own reflections, profile suggestions, strategy changes, export log |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries
@@ -165,6 +166,27 @@ confirmation and a reason before a repeat approach.
 - **Timeline** merges logged and synchronised events, labelled "Logged by you" or "Synced". Manual logging works without any email integration.
 - **Backup**: Applications → Export downloads application history and a document manifest as JSON. Supabase free plans have no automatic database backups,
   so keep an export and your original files.
+
+## Stage 5: learn and improve
+
+`/insights` measures what the search is actually producing. Everything is calculated live from the Stage 1-4 records (`apps/web/src/server/insights.ts`
+builds the facts, `packages/shared/src/insights` computes, and the numbers can always be reproduced); nothing is stored twice and no figures are invented.
+
+- **Honest rates**: every percentage shows its counts, a 95% range and a sample label (under 5 records "too few to interpret", 5-19 preliminary, 20-39
+  moderate, 40+ reasonable), plus what was left out and what is still pending. No data is "No data", never 0%. Definitions live in `metric_definitions`
+  and on the Definitions tab.
+- **Unknown is not failure**: submissions newer than the maturity window with no reply are "too early to tell"; unconfirmed submissions, test records
+  (`is_test`), duplicates and ineligible vacancies are excluded; rejected, withdrawn, vacancy closed, no response and awaiting stay separate outcomes.
+- **Funnel** with links to the underlying records, **sources** compared on relevance, reliability and downstream outcomes, **application breakdowns**
+  (direct vs speculative, role, source, CV version, area) labelled as associations, and period-on-period comparison that uses an equally long earlier
+  period when the current one is unfinished.
+- **Recommendations** are rule-based hypotheses with the observation, data, sample size, why it matters, proposed action and confidence, and can be
+  accepted, deferred or dismissed (dismissal needs a note). Refresh updates existing ones by fingerprint instead of duplicating. Thresholds are
+  deliberately conservative, so small samples produce no advice. **Nothing is changed automatically**: profile suggestions only record your decision,
+  and "I made this change" / strategy changes log what you did yourself.
+- **Feedback**: employer feedback and your own reflections are different sources, shown and counted separately, entered on each application.
+- **Reports and exports**: saved reports are immutable snapshots; exports include only the ticked sections and omit names unless you ask.
+- To mark demonstration data so analytics ignore it: `update vacancies set is_test = true where ...` (also `employers`, `applications`).
 
 ## Daily routine
 

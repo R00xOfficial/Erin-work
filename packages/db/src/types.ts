@@ -534,6 +534,67 @@ export type Database = {
           },
         ]
       }
+      application_feedback: {
+        Row: {
+          application_id: string
+          body: string
+          created_at: string
+          id: string
+          interview_id: string | null
+          kind: string
+          occurred_at: string
+          source: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          body: string
+          created_at?: string
+          id?: string
+          interview_id?: string | null
+          kind: string
+          occurred_at?: string
+          source: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          interview_id?: string | null
+          kind?: string
+          occurred_at?: string
+          source?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_feedback_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_feedback_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_feedback_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_followups: {
         Row: {
           application_id: string
@@ -634,6 +695,7 @@ export type Database = {
           employer_id: string
           feedback: string | null
           id: string
+          is_test: boolean
           lessons_learned: string | null
           next_action: string | null
           next_action_due: string | null
@@ -690,6 +752,7 @@ export type Database = {
           employer_id: string
           feedback?: string | null
           id?: string
+          is_test?: boolean
           lessons_learned?: string | null
           next_action?: string | null
           next_action_due?: string | null
@@ -746,6 +809,7 @@ export type Database = {
           employer_id?: string
           feedback?: string | null
           id?: string
+          is_test?: boolean
           lessons_learned?: string | null
           next_action?: string | null
           next_action_due?: string | null
@@ -1989,6 +2053,7 @@ export type Database = {
           is_architecture_practice: boolean | null
           is_design_studio: boolean | null
           is_suppressed: boolean
+          is_test: boolean
           last_changed_at: string | null
           last_checked_at: string | null
           latest_band: Database["public"]["Enums"]["score_band"] | null
@@ -2074,6 +2139,7 @@ export type Database = {
           is_architecture_practice?: boolean | null
           is_design_studio?: boolean | null
           is_suppressed?: boolean
+          is_test?: boolean
           last_changed_at?: string | null
           last_checked_at?: string | null
           latest_band?: Database["public"]["Enums"]["score_band"] | null
@@ -2159,6 +2225,7 @@ export type Database = {
           is_architecture_practice?: boolean | null
           is_design_studio?: boolean | null
           is_suppressed?: boolean
+          is_test?: boolean
           last_changed_at?: string | null
           last_checked_at?: string | null
           latest_band?: Database["public"]["Enums"]["score_band"] | null
@@ -2219,6 +2286,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      export_history: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          period_end: string | null
+          period_start: string | null
+          row_counts: Json
+          sections: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          period_end?: string | null
+          period_start?: string | null
+          row_counts?: Json
+          sections?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          period_end?: string | null
+          period_start?: string | null
+          row_counts?: Json
+          sections?: string[]
+        }
+        Relationships: []
       }
       geo_zones: {
         Row: {
@@ -2494,6 +2591,181 @@ export type Database = {
         }
         Relationships: []
       }
+      insight_preferences: {
+        Row: {
+          backlog_days: number
+          default_period_days: number
+          id: boolean
+          maturity_days: number
+          updated_at: string
+        }
+        Insert: {
+          backlog_days?: number
+          default_period_days?: number
+          id?: boolean
+          maturity_days?: number
+          updated_at?: string
+        }
+        Update: {
+          backlog_days?: number
+          default_period_days?: number
+          id?: boolean
+          maturity_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insight_recommendation_events: {
+        Row: {
+          created_at: string
+          event: string
+          evidence: Json | null
+          id: string
+          note: string | null
+          recommendation_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          evidence?: Json | null
+          id?: string
+          note?: string | null
+          recommendation_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          evidence?: Json | null
+          id?: string
+          note?: string | null
+          recommendation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insight_recommendation_events_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "insight_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insight_recommendations: {
+        Row: {
+          area: string
+          code: string
+          confidence: string
+          created_at: string
+          decided_at: string | null
+          deferred_until: string | null
+          evidence: Json
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          observation: string
+          proposed_action: string
+          report_id: string | null
+          sample_size: number
+          status: string
+          status_note: string | null
+          title: string
+          updated_at: string
+          why_it_matters: string
+        }
+        Insert: {
+          area: string
+          code: string
+          confidence: string
+          created_at?: string
+          decided_at?: string | null
+          deferred_until?: string | null
+          evidence?: Json
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          observation: string
+          proposed_action: string
+          report_id?: string | null
+          sample_size?: number
+          status?: string
+          status_note?: string | null
+          title: string
+          updated_at?: string
+          why_it_matters: string
+        }
+        Update: {
+          area?: string
+          code?: string
+          confidence?: string
+          created_at?: string
+          decided_at?: string | null
+          deferred_until?: string | null
+          evidence?: Json
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          observation?: string
+          proposed_action?: string
+          report_id?: string | null
+          sample_size?: number
+          status?: string
+          status_note?: string | null
+          title?: string
+          updated_at?: string
+          why_it_matters?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insight_recommendations_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "insight_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insight_reports: {
+        Row: {
+          created_at: string
+          definitions_version: number
+          id: string
+          is_partial: boolean
+          kind: string
+          note: string | null
+          params: Json
+          period_end: string
+          period_start: string
+          results: Json
+        }
+        Insert: {
+          created_at?: string
+          definitions_version?: number
+          id?: string
+          is_partial?: boolean
+          kind: string
+          note?: string | null
+          params?: Json
+          period_end: string
+          period_start: string
+          results: Json
+        }
+        Update: {
+          created_at?: string
+          definitions_version?: number
+          id?: string
+          is_partial?: boolean
+          kind?: string
+          note?: string | null
+          params?: Json
+          period_end?: string
+          period_start?: string
+          results?: Json
+        }
+        Relationships: []
+      }
       interviews: {
         Row: {
           application_id: string
@@ -2620,6 +2892,42 @@ export type Database = {
           requested_at?: string
           singleton_key?: string | null
           status?: Database["public"]["Enums"]["job_request_status"]
+        }
+        Relationships: []
+      }
+      metric_definitions: {
+        Row: {
+          created_at: string
+          denominator: string | null
+          exclusions: string | null
+          is_active: boolean
+          key: string
+          label: string
+          notes: string | null
+          numerator: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          denominator?: string | null
+          exclusions?: string | null
+          is_active?: boolean
+          key: string
+          label: string
+          notes?: string | null
+          numerator: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          denominator?: string | null
+          exclusions?: string | null
+          is_active?: boolean
+          key?: string
+          label?: string
+          notes?: string | null
+          numerator?: string
+          version?: number
         }
         Relationships: []
       }
@@ -3569,6 +3877,51 @@ export type Database = {
           },
         ]
       }
+      profile_suggestions: {
+        Row: {
+          applied_profile_version: number | null
+          created_at: string
+          decided_at: string | null
+          detail: string
+          evidence: Json
+          fingerprint: string
+          id: string
+          kind: string
+          status: string
+          status_note: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          applied_profile_version?: number | null
+          created_at?: string
+          decided_at?: string | null
+          detail: string
+          evidence?: Json
+          fingerprint: string
+          id?: string
+          kind: string
+          status?: string
+          status_note?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          applied_profile_version?: number | null
+          created_at?: string
+          decided_at?: string | null
+          detail?: string
+          evidence?: Json
+          fingerprint?: string
+          id?: string
+          kind?: string
+          status?: string
+          status_note?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       research_notes: {
         Row: {
           ai_run_id: string | null
@@ -4225,6 +4578,54 @@ export type Database = {
           },
         ]
       }
+      strategy_changes: {
+        Row: {
+          area: string
+          changed_on: string
+          created_at: string
+          description: string | null
+          id: string
+          profile_suggestion_id: string | null
+          recommendation_id: string | null
+          title: string
+        }
+        Insert: {
+          area: string
+          changed_on?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_suggestion_id?: string | null
+          recommendation_id?: string | null
+          title: string
+        }
+        Update: {
+          area?: string
+          changed_on?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_suggestion_id?: string | null
+          recommendation_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_changes_profile_suggestion_id_fkey"
+            columns: ["profile_suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "profile_suggestions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_changes_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "insight_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressions: {
         Row: {
           contact_id: string | null
@@ -4520,6 +4921,7 @@ export type Database = {
           hybrid_policy: Database["public"]["Enums"]["working_arrangement"]
           id: string
           is_adjacent: boolean
+          is_test: boolean
           last_checked_at: string | null
           last_verified_at: string | null
           lat: number | null
@@ -4606,6 +5008,7 @@ export type Database = {
           hybrid_policy?: Database["public"]["Enums"]["working_arrangement"]
           id?: string
           is_adjacent?: boolean
+          is_test?: boolean
           last_checked_at?: string | null
           last_verified_at?: string | null
           lat?: number | null
@@ -4692,6 +5095,7 @@ export type Database = {
           hybrid_policy?: Database["public"]["Enums"]["working_arrangement"]
           id?: string
           is_adjacent?: boolean
+          is_test?: boolean
           last_checked_at?: string | null
           last_verified_at?: string | null
           lat?: number | null

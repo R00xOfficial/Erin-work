@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/supabase/server";
 import { fmtDate, fmtDateTime, humanise } from "@/lib/utils";
 import { StageBadge } from "@/components/badges";
 import * as act from "@/server/actions/applications";
+import { addFeedback, deleteFeedback } from "@/server/actions/insights";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   const { supabase } = await requireUser();
   const { data: a } = await supabase.from("applications").select("*, employers(id, legal_name, display_name, applications_email), vacancies(id, title, original_url, closing_at, status, application_route, application_email, application_url, hard_flags, portfolio_requirements)").eq("id", id).is("deleted_at", null).maybeSingle();
   if (!a) notFound();
-  const [{ data: interviews }, { data: docs }, { data: transitions }, { data: activities }, { data: checklist }, { data: drafts }, { data: followups }, { data: snippets }] = await Promise.all([
+  const [{ data: interviews }, { data: docs }, { data: transitions }, { data: activities }, { data: checklist }, { data: drafts }, { data: followups }, { data: snippets }, { data: feedback }] = await Promise.all([
     supabase.from("interviews").select("*").eq("application_id", id).order("round"),
     supabase.from("documents").select("id, kind, version_label, is_current, file_name, sha256").is("deleted_at", null).order("kind").order("created_at", { ascending: false }),
     supabase.from("stage_transitions").select("*").eq("pipeline", "application").eq("entity_id", id).order("changed_at"),
@@ -30,6 +31,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
     supabase.from("application_drafts").select("*").eq("application_id", id).neq("status", "discarded").order("created_at", { ascending: false }),
     supabase.from("application_followups").select("*").eq("application_id", id).order("due_at"),
     supabase.from("reusable_snippets").select("id").not("approved_at", "is", null),
+    supabase.from("application_feedback").select("*").eq("application_id", id).order("occurred_at", { ascending: false }),
   ]);
   const e = a.employers as { id: string; legal_name: string; display_name: string | null; applications_email: string | null };
   const v = a.vacancies as { id: string; title: string; original_url: string; closing_at: string | null; status: string; application_route: string; application_email: string | null; application_url: string | null; hard_flags: string[]; portfolio_requirements: string | null } | null;
@@ -203,6 +205,22 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
                 <form action={act.createManualDraft.bind(null, A)} className="rounded border border-border p-2 space-y-2"><div className="text-sm font-medium">Write one yourself</div>
                   <div><label>Type</label><select name="kind">{DRAFT_KINDS.map((k) => <option key={k} value={k}>{humanise(k)}</option>)}</select></div><div><label>Subject</label><input name="subject" /></div><div><label>Text</label><textarea name="body" rows={3} /></div><button className="btn btn-sm">Save draft</button></form>
               </div>)}
+          </section>
+
+          <section className="card space-y-2">
+            <h2 className="font-semibold">Feedback and reflections</h2>
+            <p className="muted text-xs">What the employer told you and what you think are recorded separately and stay separate. Only record a reason for a rejection if the employer gave one.</p>
+            <ul className="space-y-1 text-sm">{(feedback ?? []).map((f) => (
+              <li key={f.id} className="flex gap-2"><div className="flex-1"><span className={`badge mr-2 ${f.source === "employer" ? "badge-accent" : ""}`}>{f.source === "employer" ? "Employer said" : "My reflection"}</span><span className="muted text-xs">{humanise(f.kind)} · {fmtDate(f.occurred_at)}{f.tags.length ? ` · ${f.tags.join(", ")}` : ""}</span><div className="whitespace-pre-wrap">{f.body}</div></div>
+                <form action={deleteFeedback.bind(null, f.id, A)}><button className="btn btn-sm">Remove</button></form></li>))}{(feedback ?? []).length === 0 && <li className="muted">None recorded.</li>}</ul>
+            <details><summary className="cursor-pointer text-sm">Add feedback or a reflection</summary>
+              <form action={addFeedback.bind(null, A)} className="space-y-2 mt-2">
+                <div><label>Who is this from?</label><select name="source"><option value="employer">The employer told me</option><option value="own">My own reflection</option></select></div>
+                <div><label>Kind</label><select name="kind">{[["rejection_reason", "Reason for rejection (if given)"], ["interview_feedback", "Interview feedback"], ["missing_skill", "Skill or experience they said was missing"], ["portfolio_feedback", "Portfolio feedback"], ["application_feedback", "Application feedback"], ["difficult_question", "A question that was hard to answer"], ["improvement_area", "Something I want to improve"], ["lesson", "Lesson learned"], ["other", "Other"]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+                <div><label>What was said or what you think</label><textarea name="body" rows={3} required /></div>
+                <div><label>Tags (comma separated, e.g. revit, part 3)</label><input name="tags" /></div>
+                <div><label>Date</label><input type="date" name="occurred_at" /></div>
+                <button className="btn btn-sm btn-primary">Save</button></form></details>
           </section>
 
           {/* Interviews and assessments */}
