@@ -124,6 +124,7 @@ export async function updateVacancy(id: string, formData: FormData) {
   const { data: v, error } = await supabase.from("vacancies").update(patch as TablesUpdate<"vacancies">).eq("id", id).select("*").single();
   if (error) throw new Error(error.message);
   await recheckEligibility(id);
+  await requestJob("assessments.recompute", { vacancyId: id, reason: "vacancy edited" }, `assess:vacancy:${id}`);
   if (v.employer_id) await requestJob("scoring.recompute", { employerId: v.employer_id }, `score:${v.employer_id}`);
   revalidatePath(`/vacancies/${id}`);
   revalidatePath("/vacancies");

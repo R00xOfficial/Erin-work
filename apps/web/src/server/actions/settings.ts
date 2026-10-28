@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { candidateProfileSchema, settingSchemas, validateWeights, SCORE_FACTORS, type SettingKey, ROLE_FAMILIES, EMPLOYMENT_TYPES } from "@ajis/shared";
+import { candidateProfileSchema, settingSchemas, validateWeights, SCORE_FACTORS, VACANCY_CRITERIA, EMPLOYER_CRITERIA, type SettingKey, ROLE_FAMILIES, EMPLOYMENT_TYPES } from "@ajis/shared";
 import { requireUser } from "@/lib/supabase/server";
 import { requestJob } from "@/server/actions/jobs";
 
@@ -45,6 +45,7 @@ export async function saveProfile(formData: FormData) {
     await requestJob("enrich.travel_time", { all: true }, "travel:all");
   }
   await requestJob("scoring.recompute", { all: true }, "score:all");
+  await requestJob("assessments.recompute", { all: true, reason: "profile changed" }, "assess:all");
   revalidatePath("/settings/profile");
   revalidatePath("/");
 }
@@ -116,4 +117,34 @@ export async function saveTemplate(formData: FormData) {
   const { error } = await supabase.from("email_templates").insert({ code, version: (latest?.version ?? 0) + 1, purpose: purpose as "speculative", subject_tmpl: subject, body_tmpl: body, variables: vars, is_active: true, notes: s(formData, "notes") });
   if (error) throw new Error(error.message);
   revalidatePath("/settings/templates");
+}
+
+/** Approving pins the current profile version: assessments are only treated as usable for Stage 3 while the profile they used is the approved one. */
+export async function approveProfile() {
+  const { supabase } = await requireUser();
+  const { data: p, error } = await supabase.from("candidate_profile").select("profile_version").eq("id", true).single();
+  if (error) throw new Error(error.message);
+  const { error: e2 } = await supabase.from("candidate_profile").update({ approved_version: p.profile_version, approved_at: new Date().toISOString() }).eq("id", true);
+  if (e2) throw new Error(e2.message);
+  await requestJob("assessments.recompute", { all: true, reason: "profile approved" }, "assess:all");
+  revalidatePath("/settings/profile");
+  revalidatePath("/research");
+}
+
+export async function saveAssessmentWeights(kind: "vacancy" | "employer", formData: FormData) {
+  const { supabase } = await requireUser();
+  const keys = kind === "vacancy" ? VACANCY_CRITERIA : EMPLOYER_CRITERIA;
+  const weights: Record<string, number> = {};
+  let total = 0;
+  for (const k of keys) {
+    const v = Number(formData.get(k) ?? 0);
+    if (!Number.isFinite(v) || v < 0) throw new Error(`Invalid weight for ${k}`);
+    weights[k] = v; total += v;
+  }
+  if (Math.abs(total - 100) > 0.001) throw new Error(`Weights must sum to 100 (got ${total}).`);
+  await supabase.from("assessment_weights").update({ is_active: false }).eq("kind", kind).eq("is_active", true);
+  const { error } = await supabase.from("assessment_weights").insert({ kind, weights, is_active: true, notes: s(formData, "notes") });
+  if (error) throw new Error(error.message);
+  await requestJob("assessments.recompute", { all: true, reason: `${kind} weights changed` }, "assess:all");
+  revalidatePath("/settings/scoring");
 }

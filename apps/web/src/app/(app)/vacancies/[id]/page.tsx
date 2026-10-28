@@ -47,6 +47,7 @@ export default async function VacancyPage({ params, searchParams }: { params: Pr
         {app ? <Link className="btn btn-primary" href={`/applications/${app.id}`}>Application: {humanise(app.stage)}</Link> : v.employer_id ? (
           <form action={createApplication}><input type="hidden" name="employer_id" value={v.employer_id} /><input type="hidden" name="vacancy_id" value={v.id} /><input type="hidden" name="application_type" value="advertised" /><button className="btn btn-primary" type="submit" disabled={v.eligibility_status === "ineligible"}>Create application</button></form>
         ) : <span className="muted text-sm self-center">Link an employer to create an application.</span>}
+        <Link className="btn" href={`/research/vacancies/${v.id}`}>Research &amp; assessment</Link>
         <form action={recheckEligibility.bind(null, v.id)}><button className="btn" type="submit">Re-check eligibility</button></form>
         <form action={closeVacancy.bind(null, v.id, "closed")}><button className="btn" type="submit">Mark closed</button></form>
         <form action={closeVacancy.bind(null, v.id, "withdrawn")}><button className="btn" type="submit">Withdrawn by employer</button></form>

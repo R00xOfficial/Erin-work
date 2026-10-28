@@ -77,6 +77,8 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 1800 careers_search | `employers.careers_search_at`: when the worker last looked for a careers page |
 | 1900 careers_extraction | `careers_pages` source definition and per-page extraction state on `sources` |
 | 2000 careers_data_quality | careers-page data-quality checks; careers source reads 60 pages a run, 4 at a time |
+| 2100 stage2_research | profile versioning/approval, `vacancy_requirements`, versioned `assessments`, `assessment_weights`, `research_runs`, Stage 3 readiness views |
+| 2200 research_unmatched_vacancies | vacancies without a matched employer can be researched |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries
@@ -104,6 +106,24 @@ idempotency, which is fine through the CLI/psql.
   suppressions and the follow-up task is cancelled.
 - **Sources respect terms.** Dezeen Jobs, Indeed, LinkedIn and the RIBA directory are email/manual only;
   fetch adapters check robots.txt and crawl delays per host; API adapters honour daily caps.
+
+## Stage 2: research and scoring
+
+Saving a vacancy or employer in Discovery queues a research run (`/research`). Nothing in Stage 2 contacts an employer.
+
+- **Vacancy research** (`research.vacancy`): reads the listing (and the employer's own page only for a vacancy with the same title when the
+  listing is thin), has Claude list the requirements the vacancy states, and keeps only those whose quote appears verbatim in that
+  vacancy's text. Erin can confirm, correct, dispute or reject each one; her decisions survive a refresh.
+- **Suitability score** (`packages/shared/src/assessment`): deterministic 100-point model (qualifications 25, experience 20, skills 20,
+  location/practical 15, career relevance 10, training 10; editable under Settings → Scoring). Unknown criteria are excluded from the total and
+  shown through the assessed share, the 0-100 range, completeness and confidence. Blockers are reported separately and never hidden by the total.
+- **Employer speculative priority**: a separate assessment (geography, relevant work, recruitment evidence, training, case for a speculative
+  approach), not comparable with vacancy scores.
+- **History and audit**: a new `assessments` row is written only when an input changes (profile version, weights, vacancy data, requirements);
+  earlier rows are kept. `research_runs` logs each step and every source that could not be read; failed or partial runs can be retried.
+- **Stage 3 readiness** (`v_research_*`): reviewed assessment, approved profile, completeness of at least 60%, no conflicting sources or
+  open disputes, and a run that did not fail.
+- The candidate profile must be approved (Settings → Candidate profile); editing a fit-related field creates a new version that needs approving again.
 
 ## Daily routine
 

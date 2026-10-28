@@ -61,6 +61,7 @@ export default async function EmployerPage({ params, searchParams }: { params: P
           </div>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
+          <Link className="btn btn-sm" href={`/research/employers/${e.id}`}>Research &amp; speculative assessment</Link>
           <BandBadge band={e.latest_band} />
           {e.latest_score != null && <span className="badge">{e.latest_score}/100</span>}
           <StageBadge stage={e.outreach_stage} />

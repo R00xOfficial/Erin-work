@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/supabase/server";
+import { queueResearch } from "@/server/research-queue";
 
 type Client = Awaited<ReturnType<typeof requireUser>>["supabase"];
 const now = () => new Date().toISOString();
@@ -25,7 +26,8 @@ export async function saveVacancy(id: string) {
     const { data: e } = await supabase.from("employers").select("legal_name, display_name").eq("id", v.employer_id).maybeSingle();
     await ensureResearchTask(supabase, v.employer_id, e?.display_name ?? e?.legal_name ?? v.employer_name_raw ?? "employer");
   }
-  refresh(`/vacancies/${id}`);
+  await queueResearch(supabase, "vacancy", id, { trigger: "saved" });
+  refresh(`/vacancies/${id}`, "/research");
 }
 
 /** "Not interested". Leaves the vacancy's real status (open / closed / ...) and all history untouched. */
@@ -48,7 +50,8 @@ export async function saveEmployer(id: string) {
   const { data: e, error } = await supabase.from("employers").update({ discovery_state: "saved", saved_at: now(), dismissed_at: null, dismissed_reason: null, reviewed_at: now() }).eq("id", id).select("legal_name, display_name").single();
   if (error) throw new Error(error.message);
   await ensureResearchTask(supabase, id, e.display_name ?? e.legal_name);
-  refresh(`/employers/${id}`);
+  await queueResearch(supabase, "employer", id, { trigger: "saved" });
+  refresh(`/employers/${id}`, "/research");
 }
 
 export async function dismissEmployer(id: string) {
