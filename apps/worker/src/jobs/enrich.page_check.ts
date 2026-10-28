@@ -12,6 +12,7 @@ const MIN_INTERVAL_H = 6, MAX_INTERVAL_D = 14;
  * Changed-page detection for tracked sources (careers pages, vacancy listings, practice homepages).
  * ETag / If-Modified-Since → 304 doubles the interval (max 14 d); a content change halves it (min 6 h),
  * stores a snapshot hash and raises a careers_page_changed signal + downstream extraction for vacancies.
+ * Sources with source_kind = careers_page are owned by discovery.careers_pages instead and skipped here.
  */
 export async function checkSource(sourceId: string) {
   const { data: s } = await db().from("sources").select("*").eq("id", sourceId).maybeSingle();
@@ -56,7 +57,7 @@ export async function checkSource(sourceId: string) {
     if (first || changed) await db().from("job_requests").insert({ job_name: "ai.vacancy_extract", payload: { vacancyId: s.entity_id }, singleton_key: `extract:${s.entity_id}` });
   }
   if (changed && s.entity_type === "employer" && s.entity_id) {
-    const isCareers = /career|job|vacanc|join|recruit|work-with-us|opportunit/i.test(url);
+    const isCareers = s.source_kind === "careers_page" || /career|job|vacanc|join|recruit|work-with-us|opportunit/i.test(url);
     await db().from("hiring_signals").upsert({ employer_id: s.entity_id, signal_type: isCareers ? "careers_page_changed" : "press", strength: isCareers ? "moderate" : "weak", summary: `${isCareers ? "Careers page" : "Tracked page"} changed: ${title ?? url}`, source_id: sourceId, evidence_status: "verified_fact" }, { onConflict: "employer_id,signal_type,source_id,observed_on", ignoreDuplicates: true });
     await db().from("tasks").insert({ title: `Tracked page changed — re-check ${extractDomain(url) ?? url}`, task_type: "research", entity_type: "employer", entity_id: s.entity_id, employer_id: s.entity_id, auto_generated: true, dedupe_key: `page_changed:${sourceId}`, priority: isCareers ? "high" : "low" });
     await db().from("job_requests").insert({ job_name: "scoring.recompute", payload: { employerId: s.entity_id }, singleton_key: `score:${s.entity_id}` });
@@ -78,7 +79,7 @@ function parseIntervalHours(v: unknown): number | null {
 
 export async function enrichPageCheck(job: Job<Payload>) {
   if (job.data.sourceId) return checkSource(job.data.sourceId);
-  const { data: due } = await db().from("sources").select("id").neq("fetch_status", "disabled").or(`next_check_at.is.null,next_check_at.lte.${new Date().toISOString()}`).not("entity_type", "is", null).order("next_check_at", { ascending: true, nullsFirst: true }).limit(job.data.limit ?? 50);
+  const { data: due } = await db().from("sources").select("id").neq("fetch_status", "disabled").or(`and(source_kind.is.null,next_check_at.is.null),and(source_kind.is.null,next_check_at.lte.%s),and(source_kind.neq.careers_page,next_check_at.is.null),and(source_kind.neq.careers_page,next_check_at.lte.%s)`.replaceAll("%s", new Date().toISOString())).not("entity_type", "is", null).order("next_check_at", { ascending: true, nullsFirst: true }).limit(job.data.limit ?? 50);
   const out: unknown[] = [];
   for (const s of due ?? []) {
     try { out.push(await checkSource(s.id)); } catch (e) { logger.warn({ sourceId: s.id, err: (e as Error).message }, "page check failed"); await db().from("sources").update({ fetch_status: "error", fetch_error: (e as Error).message, next_check_at: new Date(Date.now() + 86_400_000).toISOString() }).eq("id", s.id); }

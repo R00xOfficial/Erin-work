@@ -1,12 +1,13 @@
 import { DOCUMENT_KINDS } from "@ajis/shared";
 import { requireUser } from "@/lib/supabase/server";
 import { fmtDate, humanise } from "@/lib/utils";
-import { deleteDocument, setCurrentDocument, uploadDocument } from "@/server/actions/documents";
+import { approveSnippet, deleteDocument, deleteSnippet, saveSnippet, setCurrentDocument, uploadDocument } from "@/server/actions/documents";
 
 export const dynamic = "force-dynamic";
 
 export default async function DocumentsSettings() {
   const { supabase } = await requireUser();
+  const { data: snippets } = await supabase.from("reusable_snippets").select("*").order("kind").order("label");
   const { data: docs } = await supabase.from("documents").select("*").is("deleted_at", null).order("kind").order("created_at", { ascending: false });
   return (
     <div className="space-y-4">
@@ -26,7 +27,7 @@ export default async function DocumentsSettings() {
               <tr key={d.id}>
                 <td>{humanise(d.kind)}</td>
                 <td className="font-medium">{d.version_label}</td>
-                <td>{d.file_name}</td>
+                <td><a className="underline" href={`/api/documents/${d.id}`}>{d.file_name}</a></td>
                 <td className="muted">{d.size_bytes ? `${(Number(d.size_bytes) / 1_048_576).toFixed(1)} MB` : "—"}</td>
                 <td className="muted text-xs font-mono">{d.sha256.slice(0, 12)}…</td>
                 <td className="muted">{fmtDate(d.created_at)}</td>
@@ -38,6 +39,26 @@ export default async function DocumentsSettings() {
           </tbody>
         </table>
       </div>
+      <section className="card space-y-3">
+        <h2 className="font-semibold">Reusable answers</h2>
+        <p className="muted text-xs">Standard wording for availability, right to work, salary and common questions. Drafts may only use a snippet you have approved, and editing one withdraws its approval.</p>
+        {(snippets ?? []).map((s) => (
+          <form key={s.id} action={saveSnippet} className="grid-form rounded border border-border p-2">
+            <input type="hidden" name="id" value={s.id} />
+            <div><label>Label</label><input name="label" defaultValue={s.label} /></div>
+            <div><label>Kind</label><select name="kind" defaultValue={s.kind}>{["answer", "bio", "availability", "right_to_work", "salary", "other"].map((k) => <option key={k} value={k}>{humanise(k)}</option>)}</select></div>
+            <div className="col-span-full"><label>Text</label><textarea name="body" rows={2} defaultValue={s.body} /></div>
+            <div className="col-span-full flex items-center gap-2"><button className="btn btn-sm">Save</button>{s.approved_at ? <span className="badge badge-ok">Approved {fmtDate(s.approved_at)}</span> : <button className="btn btn-sm btn-primary" formAction={approveSnippet.bind(null, s.id)}>Approve for drafting</button>}<button className="btn btn-sm" formAction={deleteSnippet.bind(null, s.id)}>Delete</button></div>
+          </form>
+        ))}
+        <form action={saveSnippet} className="grid-form">
+          <div><label>Label</label><input name="label" required placeholder="e.g. Notice period" /></div>
+          <div><label>Kind</label><select name="kind" defaultValue="answer">{["answer", "bio", "availability", "right_to_work", "salary", "other"].map((k) => <option key={k} value={k}>{humanise(k)}</option>)}</select></div>
+          <div className="col-span-full"><label>Text</label><textarea name="body" rows={2} required /></div>
+          <div className="col-span-full"><button className="btn">Add snippet</button></div>
+        </form>
+      </section>
+      <p className="muted text-xs">Backups: this page lists what is stored. A full export of employers, vacancies, applications, notes and the document manifest is at <a className="underline" href="/api/export/everything">/api/export/everything</a>; applications alone from Applications → Export. The files themselves live in private storage; on the Supabase free plan there are no automatic database backups, so keep an export (and your original files) somewhere safe.</p>
     </div>
   );
 }

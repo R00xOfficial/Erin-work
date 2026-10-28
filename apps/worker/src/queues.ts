@@ -26,15 +26,28 @@ export const QUEUES: QueueDef[] = [
   { name: "discovery.jobsgopublic", policy: "singleton", cron: "55 3 * * *", retryLimit: 1, expireInSeconds: 1800 },
   { name: "discovery.aj_jobs", policy: "singleton", cron: "0 4 * * *", retryLimit: 1, expireInSeconds: 1800 },
   { name: "discovery.planit", policy: "singleton", cron: "50 2 * * *", retryLimit: 1, expireInSeconds: 1800 },
+  { name: "discovery.careers_pages", policy: "singleton", cron: "15 5 * * *", retryLimit: 1, expireInSeconds: 3300 },
   { name: "discovery.email_alerts", policy: "standard", retryLimit: 2 },
   // enrichment
   { name: "enrich.companies_house", policy: "stately", cron: "0 4 * * 1", retryLimit: 3, scheduleData: { all: true } },
   { name: "enrich.geocode", policy: "stately", retryLimit: 3 },
   { name: "enrich.travel_time", policy: "stately", cron: "0 5 1 * *", retryLimit: 3, scheduleData: { all: true, refresh: true } },
+  { name: "enrich.careers_pages", policy: "singleton", cron: "30 4 * * *", retryLimit: 1, expireInSeconds: 3000 },
   { name: "enrich.page_check", policy: "singleton", cron: "10 * * * *", retryLimit: 1, expireInSeconds: 1800 },
   // ai
   { name: "ai.employer_briefing", policy: "stately", retryLimit: 1, expireInSeconds: 600 },
   { name: "ai.vacancy_extract", policy: "stately", retryLimit: 1, expireInSeconds: 300 },
+  // research and assessment (Stage 2)
+  { name: "research.vacancy", policy: "standard", retryLimit: 1, expireInSeconds: 900 },
+  { name: "research.employer", policy: "standard", retryLimit: 1, expireInSeconds: 1200 },
+  { name: "assessments.recompute", policy: "standard", cron: "40 3 * * *", retryLimit: 1, expireInSeconds: 1200, scheduleData: { all: true, reason: "nightly" } },
+  // prioritisation (Stage 3)
+  { name: "priorities.recompute", policy: "standard", cron: "50 3 * * *", retryLimit: 1, expireInSeconds: 1200, scheduleData: { all: true, reason: "nightly" } },
+  { name: "planner.generate", policy: "singleton", cron: "10 6 * * *", retryLimit: 1, expireInSeconds: 600, scheduleData: { reason: "morning plan" } },
+  { name: "reminders.generate", policy: "singleton", cron: "20 * * * *", retryLimit: 0, expireInSeconds: 300 },
+  // applications (Stage 4)
+  { name: "drafts.generate", policy: "standard", retryLimit: 0, expireInSeconds: 300 },
+  { name: "followups.generate", policy: "singleton", cron: "30 6 * * *", retryLimit: 1, expireInSeconds: 600 },
   // scoring / review / tasks
   { name: "scoring.recompute", policy: "standard", cron: "30 3 * * *", retryLimit: 2, scheduleData: { all: true } },
   { name: "review.stale_records", policy: "singleton", cron: "0 7 * * *", retryLimit: 1 },

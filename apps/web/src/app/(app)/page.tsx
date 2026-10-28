@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/supabase/server";
 import { fmtDateTime, humanise } from "@/lib/utils";
 import { completeTask } from "@/server/actions/tasks";
+import { completeAction } from "@/server/actions/priorities";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,12 @@ export default async function TodayPage() {
     supabase.from("v_queue_follow_up").select("*").limit(8),
     supabase.from("v_data_quality_issues").select("issue").limit(500),
   ]);
+  const todayLondon = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+  const [{ data: planToday }, { data: topPriorities }, { data: stage3 }] = await Promise.all([
+    supabase.from("plan_actions").select("id, title, estimated_minutes, priority_items(id)").eq("status", "accepted").lte("planned_for", todayLondon).order("planned_for").limit(6),
+    supabase.from("v_priority_queue").select("id, name, status, score, days_left, deadline_at").eq("status", "high").eq("live", true).order("pinned", { ascending: false }).order("score_used", { ascending: false, nullsFirst: false }).limit(4),
+    supabase.from("v_stage3_counts").select("*").maybeSingle(),
+  ]);
   const dqCounts = new Map<string, number>();
   for (const row of dq ?? []) { const k = row.issue ?? "unknown"; dqCounts.set(k, (dqCounts.get(k) ?? 0) + 1); }
 
@@ -35,6 +42,18 @@ export default async function TodayPage() {
         <h1 className="text-xl font-semibold">Job search command centre</h1>
         <span className="muted text-xs">Live counts from the database</span>
       </div>
+
+      <section className="card space-y-2">
+        <div className="flex items-center gap-2"><h2 className="font-semibold mr-auto">Your plan</h2><Link className="btn btn-sm" href="/priorities?tab=plan">Planner</Link><Link className="btn btn-sm" href="/priorities">Priority queue</Link></div>
+        {(planToday ?? []).length === 0 && (topPriorities ?? []).length === 0 ? (
+          <p className="muted text-sm">Nothing is planned or prioritised yet. Save researched opportunities for Stage 3 to build your plan. {(stage3?.unread_notifications ?? 0) > 0 && <Link className="underline" href="/priorities">{stage3?.unread_notifications} unread reminder(s)</Link>}</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 text-sm">
+            <div><div className="muted text-xs mb-1">Planned for today or earlier</div>{(planToday ?? []).length === 0 ? <span className="muted">Nothing accepted for today.</span> : <ul className="space-y-1">{(planToday ?? []).map((a) => <li key={a.id} className="flex gap-2 items-center"><span>{a.title}{a.estimated_minutes != null && <span className="muted text-xs"> ~{a.estimated_minutes} min</span>}</span><form action={completeAction.bind(null, a.id)} className="ml-auto"><button className="btn btn-sm">Done</button></form></li>)}</ul>}</div>
+            <div><div className="muted text-xs mb-1">High priority</div>{(topPriorities ?? []).length === 0 ? <span className="muted">None right now.</span> : <ul className="space-y-1">{(topPriorities ?? []).map((t) => <li key={t.id}><Link className="underline" href={`/priorities/${t.id}`}>{t.name}</Link> <span className="muted text-xs">{t.deadline_at ? `closes in ${t.days_left} day(s)` : "closing date unknown"}</span></li>)}</ul>}</div>
+          </div>
+        )}
+      </section>
 
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Kpi label="Employers" value={c?.employers_total ?? 0} sub={`${c?.employers_verified ?? 0} verified · ${c?.employers_unresearched ?? 0} awaiting research`} href="/employers" />

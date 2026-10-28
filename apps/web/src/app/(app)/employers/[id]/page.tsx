@@ -7,7 +7,6 @@ import { BandBadge, EligibilityBadge, EvidenceBadge, StageBadge, StatusBadge } f
 import { addEmployerNote, addOffice, changeEmployerStage, deleteOffice, requestBriefing, requestRescore, suppressEmployer, updateEmployer, updateOffice } from "@/server/actions/employers";
 import { createContact, deleteContact, setDoNotContact } from "@/server/actions/contacts";
 import { saveResearchNote } from "@/server/actions/research";
-import { createApplication } from "@/server/actions/applications";
 import { createDraft } from "@/server/actions/outreach";
 import { OFFICE_TYPES, PRACTICE_TYPES, ROLE_CATEGORIES, HIRING_AUTHORITY, SIZE_BANDS, WORKING_ARRANGEMENTS, YES_NO_UNKNOWN, DATA_QUALITY } from "@ajis/shared";
 
@@ -61,6 +60,7 @@ export default async function EmployerPage({ params, searchParams }: { params: P
           </div>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
+          <Link className="btn btn-sm" href={`/research/employers/${e.id}`}>Research &amp; speculative assessment</Link>
           <BandBadge band={e.latest_band} />
           {e.latest_score != null && <span className="badge">{e.latest_score}/100</span>}
           <StageBadge stage={e.outreach_stage} />
@@ -305,7 +305,7 @@ export default async function EmployerPage({ params, searchParams }: { params: P
                       <td className="muted">{fmtDate(v.closing_at)}</td>
                       <td className="muted">{v.discovery_source ?? "—"}</td>
                       <td>{app ? <Link className="btn btn-sm" href={`/applications/${app.id}`}>{humanise(app.stage)}</Link> : (
-                        <form action={createApplication}><input type="hidden" name="employer_id" value={e.id} /><input type="hidden" name="vacancy_id" value={v.id} /><input type="hidden" name="application_type" value="advertised" /><button className="btn btn-sm" type="submit" disabled={v.eligibility_status === "ineligible"}>Create application</button></form>
+                        v.eligibility_status === "ineligible" ? <span className="muted text-xs">Ineligible</span> : <Link className="btn btn-sm" href={`/applications/new?employer_id=${e.id}&vacancy_id=${v.id}`}>Start application</Link>
                       )}</td>
                     </tr>
                   );
@@ -317,7 +317,7 @@ export default async function EmployerPage({ params, searchParams }: { params: P
           <div className="flex gap-2">
             <Link href={`/vacancies/import?employer_id=${e.id}`} className="btn">Paste a vacancy for this employer</Link>
             {!(applications.data ?? []).some((a) => a.application_type === "speculative" && !["rejected", "withdrawn", "closed_without_response"].includes(a.stage)) && (
-              <form action={createApplication}><input type="hidden" name="employer_id" value={e.id} /><input type="hidden" name="application_type" value="speculative" /><button className="btn" type="submit">Start speculative application</button></form>
+              <Link className="btn" href={`/applications/new?employer_id=${e.id}&type=speculative`}>Start speculative application</Link>
             )}
           </div>
         </div>

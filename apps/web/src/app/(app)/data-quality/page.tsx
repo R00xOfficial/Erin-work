@@ -26,7 +26,7 @@ export default async function DataQualityPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Data quality <span className="muted text-sm font-normal">({issues?.length ?? 0} issues)</span></h1>
-      <p className="muted text-xs">Duplicate employers, stale records, un-geocoded offices, missing travel times, expired vacancies, bounced contacts, conflicting claims and failing sources. Resolve them here so the scores stay honest.</p>
+      <p className="muted text-xs">Duplicate employers, stale records, dead or non-careers careers URLs, un-geocoded offices, missing travel times, expired vacancies, bounced contacts, conflicting claims and failing sources. Resolve them here so the scores stay honest.</p>
       {groups.size === 0 && <p className="card muted">No issues detected.</p>}
       {[...groups.entries()].map(([issue, rows]) => (
         <section key={issue} className="card">

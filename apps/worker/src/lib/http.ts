@@ -1,6 +1,7 @@
 import { env } from "./env.js";
 import { logger } from "./logger.js";
 import { isAllowed, pauseHost } from "./robots.js";
+import { BlockedUrlError, assertPublicUrl, safeFetch } from "./ssrf.js";
 
 /**
  * Polite HTTP client: per-host serialisation with a minimum interval (robots Crawl-delay or the
@@ -45,6 +46,11 @@ async function throttle(host: string, minIntervalMs: number) {
 }
 
 export async function politeFetch(url: string, opts: FetchOptions = {}): Promise<FetchResult> {
+  try { await assertPublicUrl(url); } catch (e) {
+    if (!(e instanceof BlockedUrlError)) throw e;
+    logger.warn({ url, reason: e.message }, "fetch blocked by SSRF guard");
+    return { status: 0, ok: false, notModified: false, text: "", headers: new Headers(), url, skipped: `blocked: ${e.message}` };
+  }
   const host = new URL(url).hostname.toLowerCase();
   let minInterval = opts.minIntervalMs ?? 2000;
   if (!opts.api) {
@@ -60,16 +66,21 @@ export async function politeFetch(url: string, opts: FetchOptions = {}): Promise
     const headers: Record<string, string> = { "user-agent": env().WORKER_USER_AGENT, accept: "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8", "accept-language": "en-GB,en;q=0.9", ...(opts.headers ?? {}) };
     if (opts.etag) headers["if-none-match"] = opts.etag;
     if (opts.lastModified) headers["if-modified-since"] = opts.lastModified;
-    const res = await fetch(url, { method: opts.method ?? "GET", headers, body: opts.body, redirect: "follow", signal: AbortSignal.timeout(opts.timeoutMs ?? 30_000) });
+    let fetched;
+    try { fetched = await safeFetch(url, { method: opts.method ?? "GET", headers, body: opts.body, signal: AbortSignal.timeout(opts.timeoutMs ?? 30_000) }); } catch (e) {
+      if (!(e instanceof BlockedUrlError)) throw e;
+      logger.warn({ url, reason: e.message }, "fetch blocked by SSRF guard");
+      return { status: 0, ok: false, notModified: false, text: "", headers: new Headers(), url, skipped: `blocked: ${e.message}` };
+    }
+    const { res, finalUrl, text } = fetched;
     if (res.status === 429 || res.status === 503) {
       const ra = Number(res.headers.get("retry-after"));
       const pause = Number.isFinite(ra) && ra > 0 ? ra : 600;
       await pauseHost(host, pause);
       logger.warn({ host, status: res.status, pause }, "rate limited; host paused");
     }
-    if (res.status === 304) return { status: 304, ok: true, notModified: true, text: "", headers: res.headers, url: res.url };
-    const text = res.ok ? await res.text() : "";
-    return { status: res.status, ok: res.ok, notModified: false, text, headers: res.headers, url: res.url };
+    if (res.status === 304) return { status: 304, ok: true, notModified: true, text: "", headers: res.headers, url: finalUrl };
+    return { status: res.status, ok: res.ok, notModified: false, text, headers: res.headers, url: finalUrl };
   } finally {
     release();
   }

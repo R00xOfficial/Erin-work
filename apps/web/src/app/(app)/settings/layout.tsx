@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const TABS = [["profile", "Candidate profile"], ["scoring", "Scoring"], ["geography", "Geography"], ["caps", "Caps & cadence"], ["gmail", "Gmail & stop switch"], ["templates", "Templates"], ["documents", "Documents"]] as const;
+const TABS = [["profile", "Candidate profile"], ["scoring", "Scoring"], ["planner", "Planner & reminders"], ["geography", "Geography"], ["caps", "Caps & cadence"], ["gmail", "Gmail & stop switch"], ["templates", "Templates"], ["documents", "Documents"]] as const;
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return (

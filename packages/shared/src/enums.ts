@@ -29,32 +29,41 @@ export const TERMINAL_OUTREACH_STAGES: readonly EmployerOutreachStage[] = [
 export const APPLICATION_STAGES = [
   "vacancy_discovered",
   "eligibility_checked",
+  "selected",
   "preparing",
   "ready_to_submit",
   "submitted",
+  "awaiting_response",
   "acknowledged",
   "shortlisted",
   "interview_1",
   "further_interview",
+  "assessment",
   "offer_received",
   "offer_accepted",
+  "offer_declined",
   "rejected",
   "withdrawn",
+  "vacancy_closed",
   "closed_without_response",
 ] as const;
 export type ApplicationStage = (typeof APPLICATION_STAGES)[number];
 export const TERMINAL_APPLICATION_STAGES: readonly ApplicationStage[] = [
   "offer_accepted",
+  "offer_declined",
   "rejected",
   "withdrawn",
+  "vacancy_closed",
   "closed_without_response",
 ];
 export const ACTIVE_APPLICATION_STAGES: readonly ApplicationStage[] = [
   "submitted",
+  "awaiting_response",
   "acknowledged",
   "shortlisted",
   "interview_1",
   "further_interview",
+  "assessment",
   "offer_received",
 ];
 
@@ -136,6 +145,9 @@ export const HIRING_AUTHORITY = ["decision_maker", "influencer", "gatekeeper", "
 export const EMAIL_VERIFICATION = ["unverified", "pattern_inferred", "confirmed_by_reply", "bounced"] as const;
 export const CONTACT_CHANNELS = ["email", "phone", "linkedin", "contact_form", "in_person"] as const;
 export const RELATIONSHIP_STATUSES = ["none", "contacted", "replied", "warm", "met"] as const;
+
+export const DISCOVERY_STATES = ["new", "saved", "dismissed"] as const;
+export type DiscoveryState = (typeof DISCOVERY_STATES)[number];
 
 export const VACANCY_STATUSES = ["open", "closing_soon", "closed", "filled", "withdrawn", "unverified"] as const;
 export type VacancyStatus = (typeof VACANCY_STATUSES)[number];

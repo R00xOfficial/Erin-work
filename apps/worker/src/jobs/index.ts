@@ -8,9 +8,19 @@ import { enrichGeocode } from "./enrich.geocode.js";
 import { enrichTravelTime } from "./enrich.travel_time.js";
 import { enrichCompaniesHouse } from "./enrich.companies_house.js";
 import { enrichPageCheck } from "./enrich.page_check.js";
+import { enrichCareersPages } from "./enrich.careers_pages.js";
 import { aiEmployerBriefing } from "./ai.employer_briefing.js";
 import { aiVacancyExtract } from "./ai.vacancy_extract.js";
 import { discoveryJob } from "./discovery.js";
+import { researchVacancy } from "./research.vacancy.js";
+import { researchEmployer } from "./research.employer.js";
+import { prioritiesRecompute } from "./priorities.recompute.js";
+import { plannerGenerate } from "./planner.generate.js";
+import { draftsGenerate } from "./drafts.generate.js";
+import { followupsGenerate } from "./followups.generate.js";
+import { remindersGenerate } from "./reminders.generate.js";
+import { assessmentsRecompute } from "./assessments.recompute.js";
+import { discoverCareersPages } from "./discovery.careers_pages.js";
 import { discoveryEmailAlerts } from "./discovery.email_alerts.js";
 import { tasksFollowUps } from "./tasks.follow_ups.js";
 import { gmailSync } from "./gmail.sync.js";
@@ -33,13 +43,23 @@ export const HANDLERS: Record<string, Handler> = {
   "discovery.jobsgopublic": discoveryJob("jobsgopublic"),
   "discovery.aj_jobs": discoveryJob("aj_jobs"),
   "discovery.planit": discoveryJob("planit"),
+  "discovery.careers_pages": discoverCareersPages,
   "discovery.email_alerts": discoveryEmailAlerts,
   "enrich.companies_house": enrichCompaniesHouse,
   "enrich.geocode": enrichGeocode,
   "enrich.travel_time": enrichTravelTime,
   "enrich.page_check": enrichPageCheck,
+  "enrich.careers_pages": enrichCareersPages,
   "ai.employer_briefing": aiEmployerBriefing,
   "ai.vacancy_extract": aiVacancyExtract,
+  "research.vacancy": researchVacancy,
+  "research.employer": researchEmployer,
+  "assessments.recompute": assessmentsRecompute,
+  "priorities.recompute": prioritiesRecompute,
+  "planner.generate": plannerGenerate,
+  "reminders.generate": remindersGenerate,
+  "drafts.generate": draftsGenerate,
+  "followups.generate": followupsGenerate,
   "scoring.recompute": scoringRecompute,
   "review.stale_records": reviewStaleRecords,
   "tasks.follow_ups": tasksFollowUps,
@@ -51,7 +71,7 @@ export const HANDLERS: Record<string, Handler> = {
 };
 
 /** Fetch queues run one at a time per process so per-host rate limits hold. */
-const SERIAL = new Set(QUEUES.filter((q) => q.name.startsWith("discovery.") || q.name === "enrich.page_check" || q.name.startsWith("gmail.")).map((q) => q.name));
+const SERIAL = new Set(QUEUES.filter((q) => q.name.startsWith("discovery.") || q.name === "enrich.page_check" || q.name === "enrich.careers_pages" || q.name.startsWith("gmail.")).map((q) => q.name));
 
 export async function registerHandlers(boss: PgBoss) {
   for (const [name, handler] of Object.entries(HANDLERS)) {

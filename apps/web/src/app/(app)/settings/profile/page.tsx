@@ -1,7 +1,8 @@
 import { CANDIDATE_QUALIFICATIONS, EMPLOYMENT_TYPES, ROLE_FAMILIES, WORKING_ARRANGEMENTS, DEFAULT_CANDIDATE_PROFILE } from "@ajis/shared";
 import { requireUser } from "@/lib/supabase/server";
 import { humanise } from "@/lib/utils";
-import { saveProfile } from "@/server/actions/settings";
+import { approveProfile, saveProfile } from "@/server/actions/settings";
+import { fmtDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +10,18 @@ export default async function ProfileSettings() {
   const { supabase } = await requireUser();
   const { data } = await supabase.from("candidate_profile").select("*").eq("id", true).maybeSingle();
   const p = { ...DEFAULT_CANDIDATE_PROFILE, ...(data ?? {}) };
+  const approved = data != null && data.approved_version === data.profile_version;
   return (
-    <form action={saveProfile} className="card grid-form max-w-5xl">
+    <div className="space-y-4 max-w-5xl">
+    <section className={`card text-sm flex flex-wrap items-center gap-3 ${approved ? "" : "border-warn"}`}>
+      <div className="mr-auto">
+        <strong>Profile version {data?.profile_version ?? 1}</strong>{" "}
+        {approved ? <span className="badge badge-ok">approved {data?.approved_at ? fmtDateTime(data.approved_at) : ""}</span> : <span className="badge badge-warn">not approved</span>}
+        <p className="muted text-xs mt-1">Assessments compare vacancies only with what is recorded here, and never assume a skill or qualification that is not. Approving confirms this version is accurate; editing any fit-related field creates a new version that needs approving again.</p>
+      </div>
+      {!approved && <form action={approveProfile}><button className="btn btn-primary" type="submit">Approve this version</button></form>}
+    </section>
+    <form action={saveProfile} className="card grid-form">
       <p className="col-span-full muted text-sm">This profile drives eligibility (hard flags) and scoring. Hard flags are evaluated before any score: a Part 2-only vacancy stays ineligible however good the employer looks.</p>
       <div><label>Full name</label><input name="full_name" defaultValue={p.full_name ?? ""} /></div>
       <div><label>Email (for signatures)</label><input name="email" type="email" defaultValue={p.email ?? ""} /></div>
@@ -41,5 +52,6 @@ export default async function ProfileSettings() {
       </div>
       <div className="col-span-full"><button className="btn btn-primary" type="submit">Save profile</button> <span className="muted text-xs ml-2">Saving queues a re-score of every employer; changing the postcode also queues travel-time recalculation.</span></div>
     </form>
+    </div>
   );
 }

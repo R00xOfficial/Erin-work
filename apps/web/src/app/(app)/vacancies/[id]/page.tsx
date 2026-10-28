@@ -4,8 +4,8 @@ import { APPLICATION_ROUTES, EMPLOYMENT_TYPES, QUALIFICATIONS_REQUIRED, SENIORIT
 import { requireUser } from "@/lib/supabase/server";
 import { fmtDate, fmtDateTime, humanise } from "@/lib/utils";
 import { EligibilityBadge, EvidenceBadge, StatusBadge } from "@/components/badges";
-import { createEmployerFromVacancy, dismissVacancy, linkVacancyEmployer, recheckEligibility, updateVacancy } from "@/server/actions/vacancies";
-import { createApplication } from "@/server/actions/applications";
+import { restoreVacancy, saveVacancy, dismissVacancy } from "@/server/actions/discovery";
+import { closeVacancy, createEmployerFromVacancy, linkVacancyEmployer, recheckEligibility, updateVacancy } from "@/server/actions/vacancies";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +44,20 @@ export default async function VacancyPage({ params, searchParams }: { params: Pr
 
       <div className="card flex flex-wrap gap-2">
         {app ? <Link className="btn btn-primary" href={`/applications/${app.id}`}>Application: {humanise(app.stage)}</Link> : v.employer_id ? (
-          <form action={createApplication}><input type="hidden" name="employer_id" value={v.employer_id} /><input type="hidden" name="vacancy_id" value={v.id} /><input type="hidden" name="application_type" value="advertised" /><button className="btn btn-primary" type="submit" disabled={v.eligibility_status === "ineligible"}>Create application</button></form>
+          v.eligibility_status === "ineligible" ? <span className="muted text-sm self-center">Ineligible: no application can be started.</span> : <Link className="btn btn-primary" href={`/applications/new?employer_id=${v.employer_id}&vacancy_id=${v.id}`}>Start application</Link>
         ) : <span className="muted text-sm self-center">Link an employer to create an application.</span>}
+        <Link className="btn" href={`/research/vacancies/${v.id}`}>Research &amp; assessment</Link>
         <form action={recheckEligibility.bind(null, v.id)}><button className="btn" type="submit">Re-check eligibility</button></form>
-        <form action={dismissVacancy.bind(null, v.id, "closed")}><button className="btn" type="submit">Mark closed</button></form>
-        <form action={dismissVacancy.bind(null, v.id, "withdrawn")}><button className="btn" type="submit">Not relevant</button></form>
+        <form action={closeVacancy.bind(null, v.id, "closed")}><button className="btn" type="submit">Mark closed</button></form>
+        <form action={closeVacancy.bind(null, v.id, "withdrawn")}><button className="btn" type="submit">Withdrawn by employer</button></form>
+        {v.discovery_state === "dismissed" ? (
+          <form action={restoreVacancy.bind(null, v.id)}><button className="btn" type="submit">Restore to discovery</button></form>
+        ) : (
+          <>
+            {v.discovery_state !== "saved" && <form action={saveVacancy.bind(null, v.id)}><button className="btn" type="submit">Save for research</button></form>}
+            <form action={dismissVacancy.bind(null, v.id)}><button className="btn" type="submit">Not relevant</button></form>
+          </>
+        )}
       </div>
 
       {!v.employer_id && (

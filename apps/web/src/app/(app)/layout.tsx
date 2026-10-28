@@ -5,9 +5,13 @@ import { StopSwitchBanner } from "@/components/stop-switch-banner";
 
 const NAV: { href: string; label: string }[] = [
   { href: "/", label: "Today" },
+  { href: "/discovery", label: "Discovery" },
+  { href: "/research", label: "Research" },
+  { href: "/priorities", label: "Prioritise" },
   { href: "/employers", label: "Employers" },
   { href: "/vacancies", label: "Vacancies" },
   { href: "/applications", label: "Applications" },
+  { href: "/insights", label: "Insights" },
   { href: "/contacts", label: "Contacts" },
   { href: "/outreach", label: "Outreach" },
   { href: "/tasks", label: "Tasks" },

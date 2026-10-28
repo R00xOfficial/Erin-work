@@ -15,10 +15,11 @@ export default async function SourcesPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Sources</h1>
+      <p className="text-sm">Every source is checked on its own schedule (the Schedule column), not continuously. “Last success” is when data was last actually retrieved. If a source fails, the vacancies already found stay in the database with their last verified date and are marked possibly outdated after 30 days; nothing is deleted.</p>
       <p className="muted text-xs">Each source has an adapter type that reflects what its terms allow. Sources that need an API key stay disabled until the key is present in the worker environment. Robots.txt and rate limits are enforced per host by the worker; Dezeen, Indeed, LinkedIn and the RIBA directory are email/manual only by design.</p>
       <div className="card p-0 overflow-x-auto">
         <table>
-          <thead><tr><th>Source</th><th>Adapter</th><th>Enabled</th><th>Schedule</th><th>Needs</th><th>Last run</th><th>Last success</th><th>Failures</th><th></th></tr></thead>
+          <thead><tr><th>Source</th><th>Adapter</th><th>Enabled</th><th>Schedule</th><th>Needs</th><th>Last run</th><th>Data last retrieved</th><th>Failures</th><th></th></tr></thead>
           <tbody>
             {(defs ?? []).map((d) => (
               <tr key={d.id} className={d.enabled ? "" : "opacity-70"}>
@@ -28,7 +29,7 @@ export default async function SourcesPage() {
                 <td className="muted text-xs">{d.schedule_cron ?? "on demand"}</td>
                 <td className="muted text-xs">{d.requires_env.join(", ") || "—"}</td>
                 <td className="muted whitespace-nowrap">{fmtDateTime(d.last_run_at)}</td>
-                <td className="muted whitespace-nowrap">{fmtDateTime(d.last_success_at)}</td>
+                <td className="muted whitespace-nowrap">{d.last_success_at ? fmtDateTime(d.last_success_at) : "never"}{d.consecutive_failures > 0 && <div className="text-danger text-xs">last check failed{d.last_success_at ? "; showing data from this date" : ""}</div>}</td>
                 <td>{d.consecutive_failures > 0 ? <span className="badge badge-danger">{d.consecutive_failures}</span> : "0"}</td>
                 <td className="whitespace-nowrap">
                   {d.adapter_type !== "manual_import" && d.adapter_type !== "email_alert_ingest" && <form action={runSourceNow.bind(null, d.code)} className="inline"><button className="btn btn-sm" disabled={!d.enabled}>Run now</button></form>}
