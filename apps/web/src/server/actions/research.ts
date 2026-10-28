@@ -123,6 +123,9 @@ export async function saveForStage3(kind: Kind, id: string) {
     throw new Error(`Not ready for Stage 3: ${why}.`);
   }
   await supabase.from(table(kind)).update({ stage3_saved_at: nowIso() }).eq("id", id);
+  await requestJob("priorities.recompute", kind === "vacancy" ? { vacancyId: id, reason: "saved for Stage 3" } : { employerId: id, reason: "saved for Stage 3" }, `prio:${kind}:${id}`);
+  await requestJob("planner.generate", { reason: "saved for Stage 3" }, "planner:now");
+  revalidatePath("/priorities");
   stale(kind, id);
 }
 

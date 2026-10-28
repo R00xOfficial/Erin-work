@@ -79,6 +79,8 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 2000 careers_data_quality | careers-page data-quality checks; careers source reads 60 pages a run, 4 at a time |
 | 2100 stage2_research | profile versioning/approval, `vacancy_requirements`, versioned `assessments`, `assessment_weights`, `research_runs`, Stage 3 readiness views |
 | 2200 research_unmatched_vacancies | vacancies without a matched employer can be researched |
+| 2300 stage3_prioritise | priority items (recommendation vs Erin's manual decision), decision history, editable models, planner preferences, plan actions, in-app reminders |
+| 2400 stage3_recontact_reason | a recorded reason to approach an employer again before the cooldown |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries
@@ -124,6 +126,20 @@ Saving a vacancy or employer in Discovery queues a research run (`/research`). N
 - **Stage 3 readiness** (`v_research_*`): reviewed assessment, approved profile, completeness of at least 60%, no conflicting sources or
   open disputes, and a run that did not fail.
 - The candidate profile must be approved (Settings → Candidate profile); editing a fit-related field creates a new version that needs approving again.
+
+## Stage 3: prioritise
+
+Opportunities saved for Stage 3 get a **priority item** (`/priorities`). Priority is separate from Stage 2 suitability, vacancy availability and application progress.
+
+- **Priority score** (`packages/shared/src/prioritise`): suitability 40, deadline 20, career value 15, feasibility 15, evidence 10 (editable, versioned).
+  A deadline raises priority only in proportion to suitability; blockers and practical constraints put an item on hold with the reason; closed or expired
+  vacancies are never live; an unknown closing date stays unknown; incomplete research gives no score. Employers use a separate model that
+  distinguishes confirmed recruitment from a hypothesis and holds back anyone already approached (cooldown in Settings → Planner).
+- **Your decisions win**: promote, backlog, hold (with a reason), dismiss, override the ranking, pin, favourite, accept/reject the recommendation.
+  They live in separate columns and are never overwritten by recalculation; material changes are explained and flagged for review.
+- **Planner**: `planner.generate` fits suggested actions into your stated hours and weekly limits, books deadline work before the deadline and leaves
+  the rest unscheduled with a reason. Accepted, edited, completed or dismissed actions are never touched. Effort figures are labelled estimates.
+- **Reminders**: `reminders.generate` creates in-app reminders only from stored dates, once each, with one daily/weekly summary. They are not emailed.
 
 ## Daily routine
 
