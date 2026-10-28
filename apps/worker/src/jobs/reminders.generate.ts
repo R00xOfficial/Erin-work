@@ -15,7 +15,7 @@ export async function remindersGenerate(_job: Job) {
   const today = londonDate(now);
   const startOfToday = new Date(`${today}T00:00:00Z`).getTime();
   let created = 0;
-  const notify = async (n: { kind: string; urgency: "urgent" | "routine"; title: string; body?: string; item_id?: string; action_id?: string; task_id?: string; due_at?: string | null; dedupe_key: string }) => {
+  const notify = async (n: { kind: string; urgency: "urgent" | "routine"; title: string; body?: string; item_id?: string; action_id?: string; task_id?: string; application_id?: string; followup_id?: string; due_at?: string | null; dedupe_key: string }) => {
     const { error } = await db().from("notifications").insert({ ...n, kind: n.kind as never });
     if (!error) created++;
   };
@@ -68,6 +68,37 @@ export async function remindersGenerate(_job: Job) {
   if (prefs.remindReconsider) {
     const { data: holds } = await db().from("priority_items").select("id, hold_until, hold_condition").lte("hold_until", today).eq("status", "on_hold");
     for (const h of holds ?? []) await notify({ kind: "reconsider", urgency: "routine", title: "Time to reconsider an opportunity on hold", body: `The hold ran until ${h.hold_until}.${h.hold_condition ? ` Condition: ${h.hold_condition}` : ""}`, item_id: h.id, dedupe_key: `reconsider:${h.id}:${h.hold_until}` });
+  }
+
+  // Applications: closing dates, prepared-but-not-submitted, follow-ups, interviews and assessments. Reminders only; nothing is ever sent.
+  const { data: p4 } = await db().from("planner_preferences").select("prepared_not_submitted_days, interview_remind_hours").eq("id", true).maybeSingle();
+  const { data: apps } = await db().from("applications").select("id, stage, deadline_at, stage_changed_at, vacancy_id, submission_confirmed_at, employers(legal_name, display_name), vacancies(status)").is("deleted_at", null).not("stage", "in", "(offer_accepted,offer_declined,rejected,withdrawn,vacancy_closed,closed_without_response)");
+  const appName = (a: { employers: unknown }) => { const e = a.employers as { legal_name: string; display_name: string | null } | null; return e?.display_name ?? e?.legal_name ?? "an employer"; };
+  for (const a of apps ?? []) {
+    const unsubmitted = !a.submission_confirmed_at;
+    if (unsubmitted && a.deadline_at) {
+      const left = Math.floor((new Date(a.deadline_at).getTime() - now.getTime()) / DAY);
+      const t = left >= 0 ? thresholds.find((x) => left <= x) : undefined;
+      if (t != null) await notify({ kind: "application_deadline", urgency: left <= 1 ? "urgent" : "routine", title: `Application to ${appName(a)} closes ${left === 0 ? "today" : left === 1 ? "tomorrow" : `in ${left} days`}`, body: `Closing date on record: ${fmtDate(a.deadline_at)}. It has not been submitted.`, application_id: a.id, due_at: a.deadline_at, dedupe_key: `appdl:${a.id}:${t}:${fmtDate(a.deadline_at)}` } as never);
+    }
+    if (a.stage === "ready_to_submit" && Date.now() - new Date(a.stage_changed_at).getTime() > (p4?.prepared_not_submitted_days ?? 3) * DAY)
+      await notify({ kind: "prepared_not_submitted", urgency: "routine", title: `Prepared but not submitted: ${appName(a)}`, body: `It has been ready for review since ${fmtDate(a.stage_changed_at)}. Nothing is sent until you submit it yourself.`, application_id: a.id, dedupe_key: `prep:${a.id}:${fmtDate(a.stage_changed_at)}` } as never);
+    const vs = (a.vacancies as { status: string } | null)?.status;
+    if (unsubmitted && vs && ["closed", "filled", "withdrawn"].includes(vs) && prefs.remindStatusChanges)
+      await notify({ kind: "status_changed", urgency: "routine", title: `The vacancy for your application to ${appName(a)} is now ${vs}`, body: "Check whether it is still worth sending. The application and your drafts are kept.", application_id: a.id, dedupe_key: `listing:${a.id}:${vs}` } as never);
+  }
+  const { data: fus } = await db().from("application_followups").select("id, application_id, kind, title, due_at, snoozed_until, status, basis").in("status", ["open", "snoozed"]).lte("due_at", new Date(now.getTime() + DAY).toISOString());
+  const fuKind: Record<string, string> = { awaiting_response: "follow_up_due", thank_you: "thank_you_due", info_requested: "info_requested", offer_decision: "offer_decision", custom: "follow_up_due" };
+  for (const f of fus ?? []) {
+    if (f.status === "snoozed" && f.snoozed_until && new Date(f.snoozed_until) > now) continue;
+    const late = new Date(f.due_at) < now;
+    await notify({ kind: fuKind[f.kind] ?? "follow_up_due", urgency: f.kind === "offer_decision" && late ? "urgent" : "routine", title: `${f.title}${late ? "" : " (due soon)"}`, body: `${f.basis === "rule_suggestion" ? "A suggested date" : f.basis === "employer_stated" ? "Based on a timeframe the employer gave" : "A date you set"}: ${fmtDate(f.due_at)}. Nothing is sent automatically.`, application_id: f.application_id, followup_id: f.id, due_at: f.due_at, dedupe_key: `fu:${f.id}:${fmtDate(f.due_at)}:${f.snoozed_until ? fmtDate(f.snoozed_until) : ""}` } as never);
+  }
+  const ahead = new Date(now.getTime() + (p4?.interview_remind_hours ?? 24) * 3_600_000).toISOString();
+  const { data: ivs } = await db().from("interviews").select("id, application_id, kind, title, scheduled_at, deadline_at, outcome").eq("outcome", "pending").or(`and(scheduled_at.gt.${now.toISOString()},scheduled_at.lte.${ahead}),and(deadline_at.gt.${now.toISOString()},deadline_at.lte.${ahead})`);
+  for (const iv of ivs ?? []) {
+    const when = iv.scheduled_at && new Date(iv.scheduled_at) > now ? iv.scheduled_at : iv.deadline_at!;
+    await notify({ kind: "interview_upcoming", urgency: "urgent", title: `${iv.kind === "assessment" ? "Assessment" : "Interview"} ${iv.scheduled_at && new Date(iv.scheduled_at) > now ? "coming up" : "deadline coming up"}${iv.title ? `: ${iv.title}` : ""}`, body: `On record: ${when.slice(0, 16).replace("T", " ")}.`, application_id: iv.application_id, due_at: when, dedupe_key: `iv:${iv.id}:${when.slice(0, 16)}` } as never);
   }
 
   // One digest a day (or week) instead of many small nudges.

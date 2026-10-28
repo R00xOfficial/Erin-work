@@ -16,6 +16,8 @@ import { researchVacancy } from "./research.vacancy.js";
 import { researchEmployer } from "./research.employer.js";
 import { prioritiesRecompute } from "./priorities.recompute.js";
 import { plannerGenerate } from "./planner.generate.js";
+import { draftsGenerate } from "./drafts.generate.js";
+import { followupsGenerate } from "./followups.generate.js";
 import { remindersGenerate } from "./reminders.generate.js";
 import { assessmentsRecompute } from "./assessments.recompute.js";
 import { discoverCareersPages } from "./discovery.careers_pages.js";
@@ -56,6 +58,8 @@ export const HANDLERS: Record<string, Handler> = {
   "priorities.recompute": prioritiesRecompute,
   "planner.generate": plannerGenerate,
   "reminders.generate": remindersGenerate,
+  "drafts.generate": draftsGenerate,
+  "followups.generate": followupsGenerate,
   "scoring.recompute": scoringRecompute,
   "review.stale_records": reviewStaleRecords,
   "tasks.follow_ups": tasksFollowUps,

@@ -29,32 +29,41 @@ export const TERMINAL_OUTREACH_STAGES: readonly EmployerOutreachStage[] = [
 export const APPLICATION_STAGES = [
   "vacancy_discovered",
   "eligibility_checked",
+  "selected",
   "preparing",
   "ready_to_submit",
   "submitted",
+  "awaiting_response",
   "acknowledged",
   "shortlisted",
   "interview_1",
   "further_interview",
+  "assessment",
   "offer_received",
   "offer_accepted",
+  "offer_declined",
   "rejected",
   "withdrawn",
+  "vacancy_closed",
   "closed_without_response",
 ] as const;
 export type ApplicationStage = (typeof APPLICATION_STAGES)[number];
 export const TERMINAL_APPLICATION_STAGES: readonly ApplicationStage[] = [
   "offer_accepted",
+  "offer_declined",
   "rejected",
   "withdrawn",
+  "vacancy_closed",
   "closed_without_response",
 ];
 export const ACTIVE_APPLICATION_STAGES: readonly ApplicationStage[] = [
   "submitted",
+  "awaiting_response",
   "acknowledged",
   "shortlisted",
   "interview_1",
   "further_interview",
+  "assessment",
   "offer_received",
 ];
 

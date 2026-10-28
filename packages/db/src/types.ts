@@ -29,6 +29,7 @@ export type Database = {
           bounced_at: string | null
           cc_emails: string[]
           channel: Database["public"]["Enums"]["channel"]
+          confirmation: string
           contact_id: string | null
           created_at: string
           delivered_at: string | null
@@ -45,6 +46,7 @@ export type Database = {
           notes: string | null
           occurred_at: string
           opt_out_detected: boolean
+          origin: string
           outcome: string | null
           provider: string | null
           provider_draft_id: string | null
@@ -77,6 +79,7 @@ export type Database = {
           bounced_at?: string | null
           cc_emails?: string[]
           channel?: Database["public"]["Enums"]["channel"]
+          confirmation?: string
           contact_id?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -93,6 +96,7 @@ export type Database = {
           notes?: string | null
           occurred_at?: string
           opt_out_detected?: boolean
+          origin?: string
           outcome?: string | null
           provider?: string | null
           provider_draft_id?: string | null
@@ -125,6 +129,7 @@ export type Database = {
           bounced_at?: string | null
           cc_emails?: string[]
           channel?: Database["public"]["Enums"]["channel"]
+          confirmation?: string
           contact_id?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -141,6 +146,7 @@ export type Database = {
           notes?: string | null
           occurred_at?: string
           opt_out_detected?: boolean
+          origin?: string
           outcome?: string | null
           provider?: string | null
           provider_draft_id?: string | null
@@ -166,6 +172,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
             referencedColumns: ["id"]
           },
           {
@@ -301,6 +314,305 @@ export type Database = {
         }
         Relationships: []
       }
+      application_checklist_items: {
+        Row: {
+          application_id: string
+          created_at: string
+          done: boolean
+          done_at: string | null
+          due_at: string | null
+          id: string
+          interview_id: string | null
+          kind: string
+          label: string
+          notes: string | null
+          required: boolean
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_at?: string | null
+          id?: string
+          interview_id?: string | null
+          kind?: string
+          label: string
+          notes?: string | null
+          required?: boolean
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          due_at?: string | null
+          id?: string
+          interview_id?: string | null
+          kind?: string
+          label?: string
+          notes?: string | null
+          required?: boolean
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_checklist_items_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_checklist_items_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_checklist_items_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_drafts: {
+        Row: {
+          activity_id: string | null
+          ai_run_id: string | null
+          application_id: string | null
+          body: string
+          created_at: string
+          employer_id: string | null
+          facts: Json
+          finalised_at: string | null
+          flags: Json
+          flags_acknowledged_at: string | null
+          generation_error: string | null
+          generation_state: string
+          id: string
+          kind: string
+          paragraphs: Json
+          question: string | null
+          source: string
+          status: string
+          subject: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          ai_run_id?: string | null
+          application_id?: string | null
+          body?: string
+          created_at?: string
+          employer_id?: string | null
+          facts?: Json
+          finalised_at?: string | null
+          flags?: Json
+          flags_acknowledged_at?: string | null
+          generation_error?: string | null
+          generation_state?: string
+          id?: string
+          kind: string
+          paragraphs?: Json
+          question?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          ai_run_id?: string | null
+          application_id?: string | null
+          body?: string
+          created_at?: string
+          employer_id?: string | null
+          facts?: Json
+          finalised_at?: string | null
+          flags?: Json
+          flags_acknowledged_at?: string | null
+          generation_error?: string | null
+          generation_state?: string
+          id?: string
+          kind?: string
+          paragraphs?: Json
+          question?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_drafts_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_follow_up"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_outreach_approval"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_ai_run_id_fkey"
+            columns: ["ai_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_employer_contact_history"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "application_drafts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_drafts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_followups: {
+        Row: {
+          application_id: string
+          attempt: number
+          basis: string
+          basis_note: string | null
+          completed_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          dismissed_at: string | null
+          due_at: string
+          id: string
+          interview_id: string | null
+          kind: string
+          snoozed_until: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          attempt?: number
+          basis: string
+          basis_note?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          dismissed_at?: string | null
+          due_at: string
+          id?: string
+          interview_id?: string | null
+          kind: string
+          snoozed_until?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          attempt?: number
+          basis?: string
+          basis_note?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          dismissed_at?: string | null
+          due_at?: string
+          id?: string
+          interview_id?: string | null
+          kind?: string
+          snoozed_until?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_followups_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_followups_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_followups_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           acknowledged_at: string | null
@@ -310,6 +622,8 @@ export type Database = {
           closed_at: string | null
           confirmation_email_activity_id: string | null
           confirmation_ref: string | null
+          contact_id: string | null
+          contact_source: string | null
           cover_letter_document_id: string | null
           cover_letter_text: string | null
           created_at: string
@@ -326,13 +640,30 @@ export type Database = {
           notes: string | null
           offer: Json | null
           offer_decision_deadline: string | null
+          office_id: string | null
+          outcome_at: string | null
           outcome_reason: string | null
           portfolio_document_id: string | null
+          portfolio_projects: string[]
+          priority_item_id: string | null
+          priority_snapshot: Json | null
+          recipient: string | null
+          repeat_reason: string | null
+          research_snapshot: Json | null
+          response_expected_by: string | null
+          response_timeframe_text: string | null
           right_to_work_answer: string | null
           salary_expectation: string | null
+          selected_at: string | null
+          selection_reason: string | null
           stage: Database["public"]["Enums"]["application_stage"]
           stage_changed_at: string
+          submission_confirmed_at: string | null
+          submission_confirmed_by: string | null
+          submission_evidence: string | null
+          submission_instructions: string | null
           submitted_at: string | null
+          submitted_snapshot: Json | null
           submitted_to: string | null
           submitted_via: string | null
           tailoring_notes: string | null
@@ -347,6 +678,8 @@ export type Database = {
           closed_at?: string | null
           confirmation_email_activity_id?: string | null
           confirmation_ref?: string | null
+          contact_id?: string | null
+          contact_source?: string | null
           cover_letter_document_id?: string | null
           cover_letter_text?: string | null
           created_at?: string
@@ -363,13 +696,30 @@ export type Database = {
           notes?: string | null
           offer?: Json | null
           offer_decision_deadline?: string | null
+          office_id?: string | null
+          outcome_at?: string | null
           outcome_reason?: string | null
           portfolio_document_id?: string | null
+          portfolio_projects?: string[]
+          priority_item_id?: string | null
+          priority_snapshot?: Json | null
+          recipient?: string | null
+          repeat_reason?: string | null
+          research_snapshot?: Json | null
+          response_expected_by?: string | null
+          response_timeframe_text?: string | null
           right_to_work_answer?: string | null
           salary_expectation?: string | null
+          selected_at?: string | null
+          selection_reason?: string | null
           stage?: Database["public"]["Enums"]["application_stage"]
           stage_changed_at?: string
+          submission_confirmed_at?: string | null
+          submission_confirmed_by?: string | null
+          submission_evidence?: string | null
+          submission_instructions?: string | null
           submitted_at?: string | null
+          submitted_snapshot?: Json | null
           submitted_to?: string | null
           submitted_via?: string | null
           tailoring_notes?: string | null
@@ -384,6 +734,8 @@ export type Database = {
           closed_at?: string | null
           confirmation_email_activity_id?: string | null
           confirmation_ref?: string | null
+          contact_id?: string | null
+          contact_source?: string | null
           cover_letter_document_id?: string | null
           cover_letter_text?: string | null
           created_at?: string
@@ -400,13 +752,30 @@ export type Database = {
           notes?: string | null
           offer?: Json | null
           offer_decision_deadline?: string | null
+          office_id?: string | null
+          outcome_at?: string | null
           outcome_reason?: string | null
           portfolio_document_id?: string | null
+          portfolio_projects?: string[]
+          priority_item_id?: string | null
+          priority_snapshot?: Json | null
+          recipient?: string | null
+          repeat_reason?: string | null
+          research_snapshot?: Json | null
+          response_expected_by?: string | null
+          response_timeframe_text?: string | null
           right_to_work_answer?: string | null
           salary_expectation?: string | null
+          selected_at?: string | null
+          selection_reason?: string | null
           stage?: Database["public"]["Enums"]["application_stage"]
           stage_changed_at?: string
+          submission_confirmed_at?: string | null
+          submission_confirmed_by?: string | null
+          submission_evidence?: string | null
+          submission_instructions?: string | null
           submitted_at?: string | null
+          submitted_snapshot?: Json | null
           submitted_to?: string | null
           submitted_via?: string | null
           tailoring_notes?: string | null
@@ -433,6 +802,13 @@ export type Database = {
             columns: ["confirmation_email_activity_id"]
             isOneToOne: false
             referencedRelation: "v_queue_outreach_approval"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
           {
@@ -485,10 +861,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_portfolio_document_id_fkey"
             columns: ["portfolio_document_id"]
             isOneToOne: false
             referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_priority_item_id_fkey"
+            columns: ["priority_item_id"]
+            isOneToOne: false
+            referencedRelation: "priority_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_priority_item_id_fkey"
+            columns: ["priority_item_id"]
+            isOneToOne: false
+            referencedRelation: "v_priority_queue"
             referencedColumns: ["id"]
           },
           {
@@ -1324,6 +1721,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "email_threads_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "email_threads_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -2094,52 +2498,76 @@ export type Database = {
         Row: {
           application_id: string
           calendar_event_id: string | null
+          contact_details: string | null
           created_at: string
+          deadline_at: string | null
           duration_minutes: number | null
           feedback: string | null
           format: Database["public"]["Enums"]["interview_format"]
           id: string
+          instructions: string | null
           interviewers: string | null
+          kind: string
           location: string | null
+          notes: string | null
           outcome: Database["public"]["Enums"]["interview_outcome"]
           prep_notes: string | null
           questions_asked: string | null
+          questions_to_ask: string | null
           round: number
           scheduled_at: string | null
+          thank_you_sent_at: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
           application_id: string
           calendar_event_id?: string | null
+          contact_details?: string | null
           created_at?: string
+          deadline_at?: string | null
           duration_minutes?: number | null
           feedback?: string | null
           format?: Database["public"]["Enums"]["interview_format"]
           id?: string
+          instructions?: string | null
           interviewers?: string | null
+          kind?: string
           location?: string | null
+          notes?: string | null
           outcome?: Database["public"]["Enums"]["interview_outcome"]
           prep_notes?: string | null
           questions_asked?: string | null
+          questions_to_ask?: string | null
           round?: number
           scheduled_at?: string | null
+          thank_you_sent_at?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
           application_id?: string
           calendar_event_id?: string | null
+          contact_details?: string | null
           created_at?: string
+          deadline_at?: string | null
           duration_minutes?: number | null
           feedback?: string | null
           format?: Database["public"]["Enums"]["interview_format"]
           id?: string
+          instructions?: string | null
           interviewers?: string | null
+          kind?: string
           location?: string | null
+          notes?: string | null
           outcome?: Database["public"]["Enums"]["interview_outcome"]
           prep_notes?: string | null
           questions_asked?: string | null
+          questions_to_ask?: string | null
           round?: number
           scheduled_at?: string | null
+          thank_you_sent_at?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2148,6 +2576,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
             referencedColumns: ["id"]
           },
         ]
@@ -2191,45 +2626,54 @@ export type Database = {
       notifications: {
         Row: {
           action_id: string | null
+          application_id: string | null
           body: string | null
           created_at: string
           dedupe_key: string | null
           dismissed_at: string | null
           due_at: string | null
+          followup_id: string | null
           id: string
           item_id: string | null
           kind: Database["public"]["Enums"]["notification_kind"]
           read_at: string | null
+          snoozed_until: string | null
           task_id: string | null
           title: string
           urgency: string
         }
         Insert: {
           action_id?: string | null
+          application_id?: string | null
           body?: string | null
           created_at?: string
           dedupe_key?: string | null
           dismissed_at?: string | null
           due_at?: string | null
+          followup_id?: string | null
           id?: string
           item_id?: string | null
           kind: Database["public"]["Enums"]["notification_kind"]
           read_at?: string | null
+          snoozed_until?: string | null
           task_id?: string | null
           title: string
           urgency?: string
         }
         Update: {
           action_id?: string | null
+          application_id?: string | null
           body?: string | null
           created_at?: string
           dedupe_key?: string | null
           dismissed_at?: string | null
           due_at?: string | null
+          followup_id?: string | null
           id?: string
           item_id?: string | null
           kind?: Database["public"]["Enums"]["notification_kind"]
           read_at?: string | null
+          snoozed_until?: string | null
           task_id?: string | null
           title?: string
           urgency?: string
@@ -2240,6 +2684,27 @@ export type Database = {
             columns: ["action_id"]
             isOneToOne: false
             referencedRelation: "plan_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_followup_id_fkey"
+            columns: ["followup_id"]
+            isOneToOne: false
+            referencedRelation: "application_followups"
             referencedColumns: ["id"]
           },
           {
@@ -2612,13 +3077,17 @@ export type Database = {
       }
       planner_preferences: {
         Row: {
+          application_follow_up_days: number
           digest_frequency: string
           digest_hour: number
           hours_per_day: number
           id: boolean
+          interview_remind_hours: number
           max_applications_per_week: number
+          max_follow_ups: number
           max_outreach_per_week: number
           max_research_per_week: number
+          prepared_not_submitted_days: number
           recontact_cooldown_days: number
           remind_decisions: boolean
           remind_outreach: boolean
@@ -2627,17 +3096,22 @@ export type Database = {
           remind_status_changes: boolean
           remind_tasks_due: boolean
           reminder_deadline_days: number[]
+          thank_you_hours: number
           updated_at: string
           working_days: number[]
         }
         Insert: {
+          application_follow_up_days?: number
           digest_frequency?: string
           digest_hour?: number
           hours_per_day?: number
           id?: boolean
+          interview_remind_hours?: number
           max_applications_per_week?: number
+          max_follow_ups?: number
           max_outreach_per_week?: number
           max_research_per_week?: number
+          prepared_not_submitted_days?: number
           recontact_cooldown_days?: number
           remind_decisions?: boolean
           remind_outreach?: boolean
@@ -2646,17 +3120,22 @@ export type Database = {
           remind_status_changes?: boolean
           remind_tasks_due?: boolean
           reminder_deadline_days?: number[]
+          thank_you_hours?: number
           updated_at?: string
           working_days?: number[]
         }
         Update: {
+          application_follow_up_days?: number
           digest_frequency?: string
           digest_hour?: number
           hours_per_day?: number
           id?: boolean
+          interview_remind_hours?: number
           max_applications_per_week?: number
+          max_follow_ups?: number
           max_outreach_per_week?: number
           max_research_per_week?: number
+          prepared_not_submitted_days?: number
           recontact_cooldown_days?: number
           remind_decisions?: boolean
           remind_outreach?: boolean
@@ -2665,6 +3144,7 @@ export type Database = {
           remind_status_changes?: boolean
           remind_tasks_due?: boolean
           reminder_deadline_days?: number[]
+          thank_you_hours?: number
           updated_at?: string
           working_days?: number[]
         }
@@ -3354,6 +3834,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reusable_snippets: {
+        Row: {
+          approved_at: string | null
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       scoring_weights: {
         Row: {
@@ -4584,6 +5094,105 @@ export type Database = {
         }
         Relationships: []
       }
+      v_application_pipeline: {
+        Row: {
+          application_type:
+            | Database["public"]["Enums"]["application_type"]
+            | null
+          checklist_done: number | null
+          checklist_total: number | null
+          created_at: string | null
+          deadline_at: string | null
+          employer_id: string | null
+          employer_name: string | null
+          id: string | null
+          last_activity_at: string | null
+          listing_closed: boolean | null
+          location_text: string | null
+          next_action: string | null
+          next_action_due: string | null
+          next_followup_at: string | null
+          next_interview_at: string | null
+          pipeline_column: string | null
+          priority_score: number | null
+          priority_status: string | null
+          response_expected_by: string | null
+          selected_at: string | null
+          stage: Database["public"]["Enums"]["application_stage"] | null
+          stage_changed_at: string | null
+          submission_confirmed_at: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          vacancy_id: string | null
+          vacancy_status: Database["public"]["Enums"]["vacancy_status"] | null
+          vacancy_title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_employer_contact_history"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_dashboard_counts: {
         Row: {
           applications_in_progress: number | null
@@ -5040,6 +5649,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_application_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -5318,6 +5934,10 @@ export type Database = {
       fn_normalise_company_name: { Args: { name: string }; Returns: string }
       fn_normalise_postcode: { Args: { input: string }; Returns: string }
       fn_postcode_district: { Args: { input: string }; Returns: string }
+      fn_retract_submission: {
+        Args: { p_application_id: string; p_reason: string }
+        Returns: undefined
+      }
       fn_sha256: { Args: { input: string }; Returns: string }
       fn_zone_for_location: {
         Args: { p_postcode: string; p_town: string }
@@ -5340,6 +5960,11 @@ export type Database = {
         | "application_submitted"
         | "follow_up"
         | "system"
+        | "interview_invitation"
+        | "assessment_request"
+        | "employer_feedback"
+        | "offer"
+        | "submission_confirmation"
       ai_purpose:
         | "employer_briefing"
         | "vacancy_extraction"
@@ -5360,17 +5985,22 @@ export type Database = {
       application_stage:
         | "vacancy_discovered"
         | "eligibility_checked"
+        | "selected"
         | "preparing"
         | "ready_to_submit"
         | "submitted"
+        | "awaiting_response"
         | "acknowledged"
         | "shortlisted"
         | "interview_1"
         | "further_interview"
+        | "assessment"
         | "offer_received"
         | "offer_accepted"
+        | "offer_declined"
         | "rejected"
         | "withdrawn"
+        | "vacancy_closed"
         | "closed_without_response"
       application_type:
         | "advertised"
@@ -5525,6 +6155,13 @@ export type Database = {
         | "status_changed"
         | "reconsider"
         | "digest"
+        | "application_deadline"
+        | "prepared_not_submitted"
+        | "follow_up_due"
+        | "interview_upcoming"
+        | "thank_you_due"
+        | "info_requested"
+        | "offer_decision"
       oauth_status: "active" | "needs_reauth" | "revoked"
       office_status: "active" | "closed" | "unverified"
       office_type:
@@ -5859,6 +6496,11 @@ export const Constants = {
         "application_submitted",
         "follow_up",
         "system",
+        "interview_invitation",
+        "assessment_request",
+        "employer_feedback",
+        "offer",
+        "submission_confirmation",
       ],
       ai_purpose: [
         "employer_briefing",
@@ -5883,17 +6525,22 @@ export const Constants = {
       application_stage: [
         "vacancy_discovered",
         "eligibility_checked",
+        "selected",
         "preparing",
         "ready_to_submit",
         "submitted",
+        "awaiting_response",
         "acknowledged",
         "shortlisted",
         "interview_1",
         "further_interview",
+        "assessment",
         "offer_received",
         "offer_accepted",
+        "offer_declined",
         "rejected",
         "withdrawn",
+        "vacancy_closed",
         "closed_without_response",
       ],
       application_type: [
@@ -6060,6 +6707,13 @@ export const Constants = {
         "status_changed",
         "reconsider",
         "digest",
+        "application_deadline",
+        "prepared_not_submitted",
+        "follow_up_due",
+        "interview_upcoming",
+        "thank_you_due",
+        "info_requested",
+        "offer_decision",
       ],
       oauth_status: ["active", "needs_reauth", "revoked"],
       office_status: ["active", "closed", "unverified"],
