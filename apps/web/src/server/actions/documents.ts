@@ -11,6 +11,10 @@ export async function uploadDocument(formData: FormData) {
   if (!(file instanceof File) || file.size === 0) throw new Error("Choose a file");
   if (file.size > 25 * 1024 * 1024) throw new Error("File too large (25 MB max)");
   const bytes = Buffer.from(await file.arrayBuffer());
+  // Check the file's real contents, not just its name: only PDF and Word documents are accepted.
+  const ext = file.name.toLowerCase().split(".").pop() ?? "";
+  const isPdf = bytes.subarray(0, 5).toString("latin1") === "%PDF-", isZip = bytes[0] === 0x50 && bytes[1] === 0x4b, isOle = bytes[0] === 0xd0 && bytes[1] === 0xcf;
+  if (!((ext === "pdf" && isPdf) || (ext === "docx" && isZip) || (ext === "doc" && isOle))) throw new Error("Only PDF, DOC and DOCX files are accepted, and the file contents must match its type.");
   const sha256 = createHash("sha256").update(bytes).digest("hex");
   const safeName = file.name.replace(/[^\w.\-]+/g, "_");
   // The content hash is part of the path, so a stored file is never overwritten: a submitted application keeps pointing at exactly the bytes it was sent with.

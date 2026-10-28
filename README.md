@@ -167,6 +167,8 @@ confirmation and a reason before a repeat approach.
 - **Backup**: Applications → Export downloads application history and a document manifest as JSON. Supabase free plans have no automatic database backups,
   so keep an export and your original files.
 
+> **Before relying on this site, read [EMPLOYMENT_PLATFORM_PRODUCTION_READINESS.md](EMPLOYMENT_PLATFORM_PRODUCTION_READINESS.md):** the master checklist of what has been verified, what has failed and what is blocked.
+
 ## Stage 5: learn and improve
 
 `/insights` measures what the search is actually producing. Everything is calculated live from the Stage 1-4 records (`apps/web/src/server/insights.ts`

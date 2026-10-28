@@ -1,3 +1,4 @@
+import { safeFetch } from "./ssrf.js";
 import { createRequire } from "node:module";
 
 type Robot = { isAllowed(url: string, ua?: string): boolean | undefined; getCrawlDelay(ua?: string): number | undefined };
@@ -28,8 +29,8 @@ export async function hostPolicy(host: string): Promise<HostPolicy> {
   let fetchedAt = row?.robots_fetched_at ? new Date(row.robots_fetched_at) : null;
   if (!robotsTxt || !fetchedAt || Date.now() - fetchedAt.getTime() > CACHE_MS) {
     try {
-      const res = await fetch(`https://${host}/robots.txt`, { headers: { "user-agent": env().WORKER_USER_AGENT, accept: "text/plain" }, signal: AbortSignal.timeout(15_000), redirect: "follow" });
-      robotsTxt = res.ok ? await res.text() : ""; // 404 → everything allowed
+      const got = await safeFetch(`https://${host}/robots.txt`, { headers: { "user-agent": env().WORKER_USER_AGENT, accept: "text/plain" }, signal: AbortSignal.timeout(15_000) }, { maxBytes: 500_000 });
+      robotsTxt = got.res.ok ? got.text : ""; // 404 → everything allowed
       fetchedAt = new Date();
     } catch (e) {
       logger.warn({ host, err: (e as Error).message }, "robots.txt fetch failed; treating as allow with default delay");

@@ -8,7 +8,7 @@ type Client = Awaited<ReturnType<typeof requireUser>>["supabase"];
 const PAGE = 1000;
 
 /** Supabase returns at most 1,000 rows per request; read every page so large histories are not silently truncated. */
-async function all<T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>): Promise<T[]> {
+export async function all<T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>): Promise<T[]> {
   const rows: T[] = [];
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await build(from, from + PAGE - 1);

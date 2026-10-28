@@ -58,7 +58,7 @@ export default async function DocumentsSettings() {
           <div className="col-span-full"><button className="btn">Add snippet</button></div>
         </form>
       </section>
-      <p className="muted text-xs">Backups: this page lists what is stored. Applications and the document manifest can be downloaded from Applications → Export. The files themselves live in private storage; on the Supabase free plan there are no automatic database backups, so keep an export (and your original files) somewhere safe.</p>
+      <p className="muted text-xs">Backups: this page lists what is stored. A full export of employers, vacancies, applications, notes and the document manifest is at <a className="underline" href="/api/export/everything">/api/export/everything</a>; applications alone from Applications → Export. The files themselves live in private storage; on the Supabase free plan there are no automatic database backups, so keep an export (and your original files) somewhere safe.</p>
     </div>
   );
 }
