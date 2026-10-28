@@ -11,6 +11,7 @@ export * from "./scoring/eligibility.js";
 export * from "./scoring/factors.js";
 export * from "./scoring/score.js";
 export * from "./assessment/index.js";
+export * from "./prioritise/index.js";
 export * from "./dedup/vacancy.js";
 export * from "./dedup/employer.js";
 export * from "./outreach/checklist.js";

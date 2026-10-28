@@ -3,6 +3,7 @@ import { env } from "../lib/env.js";
 import { RunLog, type SourceAttempt } from "../research/run.js";
 import { assessEmployerNow, loadAssessmentProfile } from "../research/store.js";
 import { aiEmployerBriefing, type BriefingAttempt } from "./ai.employer_briefing.js";
+import { prioritiseEntity } from "../priority/store.js";
 import type { Job } from "./index.js";
 
 interface Payload { employerId: string; runId?: string; force?: boolean; trigger?: string }
@@ -36,6 +37,7 @@ export async function researchEmployer(job: Job<Payload>) {
   } catch (err) {
     await log.step("unexpected_error", async () => { throw err; });
   }
+  if (assessed) await prioritiseEntity("employer", employerId).catch(() => null);
   const fin = await log.finish({ assessed, completeness, kind: "employer", entityId: employerId });
   await db().from("employers").update({ research_requested_at: null }).eq("id", employerId);
   return { employerId, ...fin, completeness };

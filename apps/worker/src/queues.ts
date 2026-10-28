@@ -41,6 +41,10 @@ export const QUEUES: QueueDef[] = [
   { name: "research.vacancy", policy: "standard", retryLimit: 1, expireInSeconds: 900 },
   { name: "research.employer", policy: "standard", retryLimit: 1, expireInSeconds: 1200 },
   { name: "assessments.recompute", policy: "standard", cron: "40 3 * * *", retryLimit: 1, expireInSeconds: 1200, scheduleData: { all: true, reason: "nightly" } },
+  // prioritisation (Stage 3)
+  { name: "priorities.recompute", policy: "standard", cron: "50 3 * * *", retryLimit: 1, expireInSeconds: 1200, scheduleData: { all: true, reason: "nightly" } },
+  { name: "planner.generate", policy: "singleton", cron: "10 6 * * *", retryLimit: 1, expireInSeconds: 600, scheduleData: { reason: "morning plan" } },
+  { name: "reminders.generate", policy: "singleton", cron: "20 * * * *", retryLimit: 0, expireInSeconds: 300 },
   // scoring / review / tasks
   { name: "scoring.recompute", policy: "standard", cron: "30 3 * * *", retryLimit: 2, scheduleData: { all: true } },
   { name: "review.stale_records", policy: "singleton", cron: "0 7 * * *", retryLimit: 1 },

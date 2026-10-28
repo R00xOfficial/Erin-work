@@ -2894,6 +2894,8 @@ export type Database = {
           recommendation_response_at: string | null
           recommendation_response_reason: string | null
           recommended_status: Database["public"]["Enums"]["priority_status"]
+          recontact_at: string | null
+          recontact_reason: string | null
           responded_to_status:
             | Database["public"]["Enums"]["priority_status"]
             | null
@@ -2936,6 +2938,8 @@ export type Database = {
           recommendation_response_at?: string | null
           recommendation_response_reason?: string | null
           recommended_status: Database["public"]["Enums"]["priority_status"]
+          recontact_at?: string | null
+          recontact_reason?: string | null
           responded_to_status?:
             | Database["public"]["Enums"]["priority_status"]
             | null
@@ -2978,6 +2982,8 @@ export type Database = {
           recommendation_response_at?: string | null
           recommendation_response_reason?: string | null
           recommended_status?: Database["public"]["Enums"]["priority_status"]
+          recontact_at?: string | null
+          recontact_reason?: string | null
           responded_to_status?:
             | Database["public"]["Enums"]["priority_status"]
             | null

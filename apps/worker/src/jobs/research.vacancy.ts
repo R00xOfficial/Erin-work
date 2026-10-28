@@ -9,6 +9,7 @@ import { RunLog, type SourceAttempt } from "../research/run.js";
 import { assessVacancyNow, loadAssessmentProfile } from "../research/store.js";
 import { norm, validateVacancyResearch } from "../research/validate.js";
 import { aiVacancyExtract } from "./ai.vacancy_extract.js";
+import { prioritiseEntity } from "../priority/store.js";
 import type { Job } from "./index.js";
 
 interface Payload { vacancyId: string; runId?: string; force?: boolean; trigger?: string }
@@ -147,6 +148,7 @@ export async function researchVacancy(job: Job<Payload>) {
     logger.error({ vacancyId, err: (e as Error).message }, "vacancy research crashed");
     await log.step("unexpected_error", async () => { throw e; });
   }
+  if (assessed) await prioritiseEntity("vacancy", vacancyId).catch(() => null);
   const fin = await log.finish({ assessed, completeness, kind: "vacancy", entityId: vacancyId });
   await db().from("vacancies").update({ research_requested_at: null }).eq("id", vacancyId);
   return { vacancyId, ...fin, completeness };
