@@ -53,9 +53,11 @@ export interface EligibilityResult {
   reasons: string[];
   /** Which items could not be assessed because data is missing. */
   unknowns: string[];
+  /** Each flag paired with the reason it was raised. */
+  details: { flag: HardFlag; reason: string }[];
 }
 
-const QUALIFICATION_RANK: Record<CandidateQualification, number> = {
+export const QUALIFICATION_RANK: Record<CandidateQualification, number> = {
   student: 0,
   other: 0,
   part1_equivalent: 1,
@@ -69,66 +71,58 @@ export function evaluateEligibility(v: VacancyEligibilityInput, c: CandidateElig
   const flags: HardFlag[] = [];
   const reasons: string[] = [];
   const unknowns: string[] = [];
+  const details: { flag: HardFlag; reason: string }[] = [];
+  const raise = (flag: HardFlag, reason: string) => { flags.push(flag); reasons.push(reason); details.push({ flag, reason }); };
   const rank = QUALIFICATION_RANK[c.qualification];
   const cls = classifyTitle(v.title);
 
   if (v.employerSuppressed) {
-    flags.push("employer_suppressed");
-    reasons.push("Employer is on the suppression list.");
+    raise("employer_suppressed", "Employer is on the suppression list.");
   }
   if (["closed", "filled", "withdrawn"].includes(v.status)) {
-    flags.push("vacancy_closed");
-    reasons.push(`Vacancy status is ${v.status}.`);
+    raise("vacancy_closed", `Vacancy status is ${v.status}.`);
   }
 
   const required = v.qualificationRequired !== "unknown" ? v.qualificationRequired : cls.impliedQualification;
   if (required === "part3" && rank < 3) {
-    flags.push("requires_part3");
-    reasons.push("Role requires Part 3 / registered architect.");
+    raise("requires_part3", "Role requires Part 3 / registered architect.");
   } else if (required === "part2" && rank < 2) {
-    flags.push("requires_part2");
-    reasons.push("Role requires Part 2.");
+    raise("requires_part2", "Role requires Part 2.");
   } else if (required === "unknown") {
     unknowns.push("qualification_required");
   }
 
   if (cls.family === "senior_or_unsuitable") {
-    flags.push("senior_role");
-    reasons.push("Title indicates a senior or fully qualified role.");
+    raise("senior_role", "Title indicates a senior or fully qualified role.");
   } else if (cls.family === "unknown") {
     unknowns.push("role_family");
   } else if (!cls.entryLevel && !flags.includes("requires_part2") && !flags.includes("requires_part3")) {
     // Part 2 family without explicit requirement text still gets flagged via impliedQualification above.
   }
   if (!c.acceptAdjacentEntryRoles && cls.entryLevel && !["part1_assistant", "graduate_assistant", "placement_internship"].includes(cls.family)) {
-    flags.push("employment_type_excluded");
-    reasons.push("Adjacent entry roles are excluded by your profile.");
+    raise("employment_type_excluded", "Adjacent entry roles are excluded by your profile.");
   }
 
   if (v.experienceYearsMin != null) {
     if (v.experienceYearsMin > Math.max(c.experienceYears, 2)) {
-      flags.push("requires_experience_years");
-      reasons.push(`Requires ${v.experienceYearsMin}+ years of experience.`);
+      raise("requires_experience_years", `Requires ${v.experienceYearsMin}+ years of experience.`);
     }
   } else {
     unknowns.push("experience_years");
   }
 
   if (!c.acceptedEmploymentTypes.includes(v.employmentType) && v.employmentType !== "unknown") {
-    flags.push("employment_type_excluded");
-    reasons.push(`Employment type ${v.employmentType} is outside your accepted types.`);
+    raise("employment_type_excluded", `Employment type ${v.employmentType} is outside your accepted types.`);
   } else if (v.employmentType === "unknown") {
     unknowns.push("employment_type");
   }
 
   if (c.minSalaryGbp != null && v.salaryMinGbpPerYear != null && v.salaryMinGbpPerYear < c.minSalaryGbp) {
-    flags.push("salary_below_minimum");
-    reasons.push(`Advertised salary (£${v.salaryMinGbpPerYear}) is below your minimum (£${c.minSalaryGbp}).`);
+    raise("salary_below_minimum", `Advertised salary (£${v.salaryMinGbpPerYear}) is below your minimum (£${c.minSalaryGbp}).`);
   }
 
   if (v.requiresExistingRightToWork && !c.hasUkRightToWork) {
-    flags.push("no_right_to_work");
-    reasons.push("Role requires existing UK right to work without sponsorship.");
+    raise("no_right_to_work", "Role requires existing UK right to work without sponsorship.");
   }
 
   if (!v.isRemote) {
@@ -140,8 +134,7 @@ export function evaluateEligibility(v: VacancyEligibilityInput, c: CandidateElig
       const ptOk = pt != null && pt <= c.maxPublicTransportMinutes;
       const carOk = car != null && c.maxCarMinutes != null && car <= c.maxCarMinutes;
       if (!ptOk && !carOk) {
-        flags.push("commute_exceeds_limit");
-        reasons.push(`Commute (${pt ?? "?"} min public transport / ${car ?? "?"} min car) exceeds your limit.`);
+        raise("commute_exceeds_limit", `Commute (${pt ?? "?"} min public transport / ${car ?? "?"} min car) exceeds your limit.`);
       }
     }
   }
@@ -150,5 +143,5 @@ export function evaluateEligibility(v: VacancyEligibilityInput, c: CandidateElig
   let status: EligibilityStatus = "eligible";
   if (uniqueFlags.length > 0) status = "ineligible";
   else if (unknowns.includes("qualification_required") && unknowns.includes("role_family")) status = "needs_review";
-  return { status, hardFlags: uniqueFlags, reasons, unknowns };
+  return { status, hardFlags: uniqueFlags, reasons, unknowns, details };
 }

@@ -197,6 +197,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -215,6 +222,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -450,6 +464,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_portfolio_document_id_fkey"
             columns: ["portfolio_document_id"]
             isOneToOne: false
@@ -474,8 +495,190 @@ export type Database = {
             foreignKeyName: "applications_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
             referencedRelation: "vacancies"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_weights: {
+        Row: {
+          created_at: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          notes: string | null
+          version: number
+          weights: Json
+        }
+        Insert: {
+          created_at?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          notes?: string | null
+          version?: number
+          weights: Json
+        }
+        Update: {
+          created_at?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["assessment_kind"]
+          notes?: string | null
+          version?: number
+          weights?: Json
+        }
+        Relationships: []
+      }
+      assessments: {
+        Row: {
+          blockers: Json
+          completeness: number
+          computed_at: string
+          confidence: number
+          conflicts: Json
+          criteria: Json
+          develop: string[]
+          employer_id: string | null
+          id: string
+          inputs_hash: string
+          is_current: boolean
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          missing: string[]
+          next_steps: string[]
+          profile_approved: boolean
+          profile_version: number
+          questions: string[]
+          research_run_id: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          strengths: string[]
+          superseded_at: string | null
+          total: number
+          vacancy_id: string | null
+          weights_version: number
+        }
+        Insert: {
+          blockers?: Json
+          completeness?: number
+          computed_at?: string
+          confidence?: number
+          conflicts?: Json
+          criteria: Json
+          develop?: string[]
+          employer_id?: string | null
+          id?: string
+          inputs_hash: string
+          is_current?: boolean
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          missing?: string[]
+          next_steps?: string[]
+          profile_approved?: boolean
+          profile_version: number
+          questions?: string[]
+          research_run_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          strengths?: string[]
+          superseded_at?: string | null
+          total: number
+          vacancy_id?: string | null
+          weights_version: number
+        }
+        Update: {
+          blockers?: Json
+          completeness?: number
+          computed_at?: string
+          confidence?: number
+          conflicts?: Json
+          criteria?: Json
+          develop?: string[]
+          employer_id?: string | null
+          id?: string
+          inputs_hash?: string
+          is_current?: boolean
+          kind?: Database["public"]["Enums"]["assessment_kind"]
+          missing?: string[]
+          next_steps?: string[]
+          profile_approved?: boolean
+          profile_version?: number
+          questions?: string[]
+          research_run_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          strengths?: string[]
+          superseded_at?: string | null
+          total?: number
+          vacancy_id?: string | null
+          weights_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_weights_version_fkey"
+            columns: ["weights_version"]
+            isOneToOne: false
+            referencedRelation: "assessment_weights"
+            referencedColumns: ["version"]
           },
         ]
       }
@@ -513,6 +716,8 @@ export type Database = {
         Row: {
           accept_adjacent_entry_roles: boolean
           accepted_employment_types: Database["public"]["Enums"]["employment_type"][]
+          approved_at: string | null
+          approved_version: number | null
           availability_from: string | null
           created_at: string
           default_cover_letter_document_id: string | null
@@ -535,6 +740,7 @@ export type Database = {
           objective: string
           phone: string | null
           portfolio_url: string | null
+          profile_version: number
           qualification: Database["public"]["Enums"]["candidate_qualification"]
           qualification_verified: boolean
           sector_interests: string[]
@@ -548,6 +754,8 @@ export type Database = {
         Insert: {
           accept_adjacent_entry_roles?: boolean
           accepted_employment_types?: Database["public"]["Enums"]["employment_type"][]
+          approved_at?: string | null
+          approved_version?: number | null
           availability_from?: string | null
           created_at?: string
           default_cover_letter_document_id?: string | null
@@ -570,6 +778,7 @@ export type Database = {
           objective?: string
           phone?: string | null
           portfolio_url?: string | null
+          profile_version?: number
           qualification?: Database["public"]["Enums"]["candidate_qualification"]
           qualification_verified?: boolean
           sector_interests?: string[]
@@ -583,6 +792,8 @@ export type Database = {
         Update: {
           accept_adjacent_entry_roles?: boolean
           accepted_employment_types?: Database["public"]["Enums"]["employment_type"][]
+          approved_at?: string | null
+          approved_version?: number | null
           availability_from?: string | null
           created_at?: string
           default_cover_letter_document_id?: string | null
@@ -605,6 +816,7 @@ export type Database = {
           objective?: string
           phone?: string | null
           portfolio_url?: string | null
+          profile_version?: number
           qualification?: Database["public"]["Enums"]["candidate_qualification"]
           qualification_verified?: boolean
           sector_interests?: string[]
@@ -852,6 +1064,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
             referencedColumns: ["id"]
           },
           {
@@ -1104,6 +1323,13 @@ export type Database = {
             referencedRelation: "v_queue_research"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "email_threads_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       employer_aliases: {
@@ -1151,6 +1377,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employer_aliases_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
             referencedColumns: ["id"]
           },
           {
@@ -1225,6 +1458,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "employer_scores_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employer_scores_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
@@ -1236,6 +1476,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employer_scores_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -1314,6 +1561,9 @@ export type Database = {
           recruitment_intelligence: string | null
           recruitment_intelligence_evidence: Database["public"]["Enums"]["evidence_status"]
           research_notes: string | null
+          research_requested_at: string | null
+          research_state: Database["public"]["Enums"]["research_state"]
+          returned_to_discovery_at: string | null
           reviewed_at: string | null
           riba_chartered: Database["public"]["Enums"]["yes_no_unknown"]
           riba_chartered_evidence: Database["public"]["Enums"]["evidence_status"]
@@ -1326,6 +1576,7 @@ export type Database = {
           specialisms: string[]
           staff_estimate: number | null
           staff_estimate_source: string | null
+          stage3_saved_at: string | null
           subsidiaries: string[]
           team_structure_notes: string | null
           training_support: string | null
@@ -1395,6 +1646,9 @@ export type Database = {
           recruitment_intelligence?: string | null
           recruitment_intelligence_evidence?: Database["public"]["Enums"]["evidence_status"]
           research_notes?: string | null
+          research_requested_at?: string | null
+          research_state?: Database["public"]["Enums"]["research_state"]
+          returned_to_discovery_at?: string | null
           reviewed_at?: string | null
           riba_chartered?: Database["public"]["Enums"]["yes_no_unknown"]
           riba_chartered_evidence?: Database["public"]["Enums"]["evidence_status"]
@@ -1407,6 +1661,7 @@ export type Database = {
           specialisms?: string[]
           staff_estimate?: number | null
           staff_estimate_source?: string | null
+          stage3_saved_at?: string | null
           subsidiaries?: string[]
           team_structure_notes?: string | null
           training_support?: string | null
@@ -1476,6 +1731,9 @@ export type Database = {
           recruitment_intelligence?: string | null
           recruitment_intelligence_evidence?: Database["public"]["Enums"]["evidence_status"]
           research_notes?: string | null
+          research_requested_at?: string | null
+          research_state?: Database["public"]["Enums"]["research_state"]
+          returned_to_discovery_at?: string | null
           reviewed_at?: string | null
           riba_chartered?: Database["public"]["Enums"]["yes_no_unknown"]
           riba_chartered_evidence?: Database["public"]["Enums"]["evidence_status"]
@@ -1488,6 +1746,7 @@ export type Database = {
           specialisms?: string[]
           staff_estimate?: number | null
           staff_estimate_source?: string | null
+          stage3_saved_at?: string | null
           subsidiaries?: string[]
           team_structure_notes?: string | null
           training_support?: string | null
@@ -1610,6 +1869,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hiring_signals_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hiring_signals_source_id_fkey"
             columns: ["source_id"]
             isOneToOne: false
@@ -1628,6 +1894,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hiring_signals_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -1985,6 +2258,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "offices_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "offices_local_contact_fk"
             columns: ["local_hiring_contact_id"]
             isOneToOne: false
@@ -2126,6 +2406,13 @@ export type Database = {
             referencedRelation: "v_queue_research"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "planning_applications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       research_notes: {
@@ -2232,6 +2519,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "research_notes_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "research_notes_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
@@ -2247,6 +2541,125 @@ export type Database = {
           },
           {
             foreignKeyName: "research_notes_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_notes_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      research_runs: {
+        Row: {
+          completeness: number | null
+          created_at: string
+          employer_id: string | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          retry_of: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["research_run_status"]
+          steps: Json
+          trigger: string
+          vacancy_id: string | null
+        }
+        Insert: {
+          completeness?: number | null
+          created_at?: string
+          employer_id?: string | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["assessment_kind"]
+          retry_of?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["research_run_status"]
+          steps?: Json
+          trigger?: string
+          vacancy_id?: string | null
+        }
+        Update: {
+          completeness?: number | null
+          created_at?: string
+          employer_id?: string | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["assessment_kind"]
+          retry_of?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["research_run_status"]
+          steps?: Json
+          trigger?: string
+          vacancy_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_runs_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_retry_of_fkey"
+            columns: ["retry_of"]
+            isOneToOne: false
+            referencedRelation: "research_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_runs_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "vacancies"
@@ -2687,6 +3100,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "suppressions_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "suppressions_source_activity_id_fkey"
             columns: ["source_activity_id"]
             isOneToOne: false
@@ -2784,6 +3204,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
             referencedColumns: ["id"]
           },
         ]
@@ -2900,7 +3327,10 @@ export type Database = {
           qualification_required: Database["public"]["Enums"]["qualification_required"]
           recruitment_contact_id: string | null
           reporting_line: string | null
+          research_requested_at: string | null
+          research_state: Database["public"]["Enums"]["research_state"]
           responsibilities: string[]
+          returned_to_discovery_at: string | null
           reviewed_at: string | null
           right_to_work_required: boolean | null
           role_family: Database["public"]["Enums"]["role_family"]
@@ -2918,6 +3348,7 @@ export type Database = {
           software_requested: string[]
           source_definition_id: string | null
           source_id: string | null
+          stage3_saved_at: string | null
           status: Database["public"]["Enums"]["vacancy_status"]
           team_info: string | null
           title: string
@@ -2982,7 +3413,10 @@ export type Database = {
           qualification_required?: Database["public"]["Enums"]["qualification_required"]
           recruitment_contact_id?: string | null
           reporting_line?: string | null
+          research_requested_at?: string | null
+          research_state?: Database["public"]["Enums"]["research_state"]
           responsibilities?: string[]
+          returned_to_discovery_at?: string | null
           reviewed_at?: string | null
           right_to_work_required?: boolean | null
           role_family?: Database["public"]["Enums"]["role_family"]
@@ -3000,6 +3434,7 @@ export type Database = {
           software_requested?: string[]
           source_definition_id?: string | null
           source_id?: string | null
+          stage3_saved_at?: string | null
           status?: Database["public"]["Enums"]["vacancy_status"]
           team_info?: string | null
           title: string
@@ -3064,7 +3499,10 @@ export type Database = {
           qualification_required?: Database["public"]["Enums"]["qualification_required"]
           recruitment_contact_id?: string | null
           reporting_line?: string | null
+          research_requested_at?: string | null
+          research_state?: Database["public"]["Enums"]["research_state"]
           responsibilities?: string[]
+          returned_to_discovery_at?: string | null
           reviewed_at?: string | null
           right_to_work_required?: boolean | null
           role_family?: Database["public"]["Enums"]["role_family"]
@@ -3082,6 +3520,7 @@ export type Database = {
           software_requested?: string[]
           source_definition_id?: string | null
           source_id?: string | null
+          stage3_saved_at?: string | null
           status?: Database["public"]["Enums"]["vacancy_status"]
           team_info?: string | null
           title?: string
@@ -3101,6 +3540,13 @@ export type Database = {
             columns: ["duplicate_of_vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_duplicate_of_vacancy_id_fkey"
+            columns: ["duplicate_of_vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -3132,6 +3578,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vacancies_office_id_fkey"
             columns: ["office_id"]
             isOneToOne: false
@@ -3157,6 +3610,13 @@ export type Database = {
             columns: ["posted_by_agency_id"]
             isOneToOne: false
             referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_posted_by_agency_id_fkey"
+            columns: ["posted_by_agency_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
             referencedColumns: ["id"]
           },
           {
@@ -3186,6 +3646,112 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "geo_zones"
             referencedColumns: ["code"]
+          },
+        ]
+      }
+      vacancy_requirements: {
+        Row: {
+          ai_run_id: string | null
+          confidence: number | null
+          created_at: string
+          evidence_status: Database["public"]["Enums"]["evidence_status"]
+          extracted_by: Database["public"]["Enums"]["claim_extractor"]
+          id: string
+          is_current: boolean
+          kind: Database["public"]["Enums"]["requirement_kind"]
+          necessity: Database["public"]["Enums"]["requirement_necessity"]
+          normalised_text: string
+          original: Json | null
+          quote: string | null
+          review: Database["public"]["Enums"]["requirement_review"]
+          review_note: string | null
+          source_id: string | null
+          text: string
+          updated_at: string
+          vacancy_id: string
+        }
+        Insert: {
+          ai_run_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence_status?: Database["public"]["Enums"]["evidence_status"]
+          extracted_by?: Database["public"]["Enums"]["claim_extractor"]
+          id?: string
+          is_current?: boolean
+          kind: Database["public"]["Enums"]["requirement_kind"]
+          necessity?: Database["public"]["Enums"]["requirement_necessity"]
+          normalised_text: string
+          original?: Json | null
+          quote?: string | null
+          review?: Database["public"]["Enums"]["requirement_review"]
+          review_note?: string | null
+          source_id?: string | null
+          text: string
+          updated_at?: string
+          vacancy_id: string
+        }
+        Update: {
+          ai_run_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence_status?: Database["public"]["Enums"]["evidence_status"]
+          extracted_by?: Database["public"]["Enums"]["claim_extractor"]
+          id?: string
+          is_current?: boolean
+          kind?: Database["public"]["Enums"]["requirement_kind"]
+          necessity?: Database["public"]["Enums"]["requirement_necessity"]
+          normalised_text?: string
+          original?: Json | null
+          quote?: string | null
+          review?: Database["public"]["Enums"]["requirement_review"]
+          review_note?: string | null
+          source_id?: string | null
+          text?: string
+          updated_at?: string
+          vacancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacancy_requirements_ai_run_id_fkey"
+            columns: ["ai_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_requirements_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_requirements_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_requirements_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_requirements_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_requirements_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3240,6 +3806,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_snapshots_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -3455,6 +4028,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vacancies_zone_code_fkey"
             columns: ["zone_code"]
             isOneToOne: false
@@ -3507,6 +4087,13 @@ export type Database = {
             referencedRelation: "v_queue_research"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activities_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_queue_new_vacancies: {
@@ -3549,6 +4136,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
             referencedColumns: ["id"]
           },
           {
@@ -3613,6 +4207,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
@@ -3624,6 +4225,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "v_queue_new_vacancies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_vacancies"
             referencedColumns: ["id"]
           },
           {
@@ -3691,6 +4299,110 @@ export type Database = {
           zone_code?: never
         }
         Relationships: []
+      }
+      v_research_counts: {
+        Row: {
+          employers_in_research: number | null
+          employers_ready: number | null
+          profile_approved: boolean | null
+          profile_version: number | null
+          recent_run_problems: number | null
+          vacancies_awaiting: number | null
+          vacancies_in_research: number | null
+          vacancies_needs_review: number | null
+          vacancies_ready: number | null
+          vacancies_with_blockers: number | null
+        }
+        Relationships: []
+      }
+      v_research_employers: {
+        Row: {
+          assessment_id: string | null
+          blocker_count: number | null
+          completeness: number | null
+          computed_at: string | null
+          confidence: number | null
+          conflict_count: number | null
+          discovery_state: Database["public"]["Enums"]["discovery_state"] | null
+          id: string | null
+          last_checked_at: string | null
+          name: string | null
+          open_vacancy_count: number | null
+          practice_type: Database["public"]["Enums"]["practice_type"] | null
+          profile_approved: boolean | null
+          ready_for_stage3: boolean | null
+          research_state: Database["public"]["Enums"]["research_state"] | null
+          returned_to_discovery_at: string | null
+          reviewed_at: string | null
+          run_error: string | null
+          run_finished_at: string | null
+          run_status: Database["public"]["Enums"]["research_run_status"] | null
+          stage3_saved_at: string | null
+          stale: boolean | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      v_research_vacancies: {
+        Row: {
+          assessment_id: string | null
+          blocker_count: number | null
+          closing_at: string | null
+          completeness: number | null
+          computed_at: string | null
+          confidence: number | null
+          conflict_count: number | null
+          discovery_state: Database["public"]["Enums"]["discovery_state"] | null
+          disputed_count: number | null
+          employer_id: string | null
+          employer_name: string | null
+          id: string | null
+          last_verified_at: string | null
+          location_text: string | null
+          profile_approved: boolean | null
+          ready_for_stage3: boolean | null
+          research_state: Database["public"]["Enums"]["research_state"] | null
+          returned_to_discovery_at: string | null
+          reviewed_at: string | null
+          run_error: string | null
+          run_finished_at: string | null
+          run_status: Database["public"]["Enums"]["research_run_status"] | null
+          stage3_saved_at: string | null
+          stale: boolean | null
+          status: Database["public"]["Enums"]["vacancy_status"] | null
+          title: string | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_discovery_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_queue_research"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "v_research_employers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_today_actions: {
         Row: {
@@ -3781,6 +4493,7 @@ export type Database = {
         | "pending_approval"
         | "approved"
         | "rejected"
+      assessment_kind: "vacancy" | "employer"
       candidate_qualification:
         | "part1_equivalent"
         | "part1"
@@ -3950,6 +4663,33 @@ export type Database = {
         | "other"
         | "unknown"
       relationship_status: "none" | "contacted" | "replied" | "warm" | "met"
+      requirement_kind:
+        | "qualification"
+        | "registration"
+        | "experience"
+        | "skill"
+        | "software"
+        | "other"
+      requirement_necessity: "essential" | "desirable" | "unclear"
+      requirement_review:
+        | "unreviewed"
+        | "confirmed"
+        | "corrected"
+        | "disputed"
+        | "rejected"
+      research_run_status:
+        | "queued"
+        | "running"
+        | "succeeded"
+        | "partial"
+        | "failed"
+      research_state:
+        | "none"
+        | "queued"
+        | "running"
+        | "needs_review"
+        | "reviewed"
+        | "failed"
       role_category:
         | "director_partner"
         | "associate"
@@ -4252,6 +4992,7 @@ export const Constants = {
         "approved",
         "rejected",
       ],
+      assessment_kind: ["vacancy", "employer"],
       candidate_qualification: [
         "part1_equivalent",
         "part1",
@@ -4433,6 +5174,37 @@ export const Constants = {
         "unknown",
       ],
       relationship_status: ["none", "contacted", "replied", "warm", "met"],
+      requirement_kind: [
+        "qualification",
+        "registration",
+        "experience",
+        "skill",
+        "software",
+        "other",
+      ],
+      requirement_necessity: ["essential", "desirable", "unclear"],
+      requirement_review: [
+        "unreviewed",
+        "confirmed",
+        "corrected",
+        "disputed",
+        "rejected",
+      ],
+      research_run_status: [
+        "queued",
+        "running",
+        "succeeded",
+        "partial",
+        "failed",
+      ],
+      research_state: [
+        "none",
+        "queued",
+        "running",
+        "needs_review",
+        "reviewed",
+        "failed",
+      ],
       role_category: [
         "director_partner",
         "associate",

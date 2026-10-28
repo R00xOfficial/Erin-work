@@ -37,6 +37,10 @@ export const QUEUES: QueueDef[] = [
   // ai
   { name: "ai.employer_briefing", policy: "stately", retryLimit: 1, expireInSeconds: 600 },
   { name: "ai.vacancy_extract", policy: "stately", retryLimit: 1, expireInSeconds: 300 },
+  // research and assessment (Stage 2)
+  { name: "research.vacancy", policy: "standard", retryLimit: 1, expireInSeconds: 900 },
+  { name: "research.employer", policy: "standard", retryLimit: 1, expireInSeconds: 1200 },
+  { name: "assessments.recompute", policy: "standard", cron: "40 3 * * *", retryLimit: 1, expireInSeconds: 1200, scheduleData: { all: true, reason: "nightly" } },
   // scoring / review / tasks
   { name: "scoring.recompute", policy: "standard", cron: "30 3 * * *", retryLimit: 2, scheduleData: { all: true } },
   { name: "review.stale_records", policy: "singleton", cron: "0 7 * * *", retryLimit: 1 },

@@ -9,6 +9,7 @@ import type { Job } from "./index.js";
 interface Payload { employerId: string; force?: boolean }
 const PROMPT_VERSION = "briefing-v1";
 const MAX_PAGES = 6, MAX_CHARS_PER_PAGE = 6000;
+export interface BriefingAttempt { url: string; ok: boolean; status: number; skipped?: string }
 
 const SYSTEM = `You are a research analyst preparing an employer intelligence briefing for an entry-level architecture job seeker (University of Portsmouth architecture graduate, London-based, Part 1-equivalent, open to assistant, technician, BIM/CAD, design-coordination and planning routes).
 
@@ -22,6 +23,7 @@ Rules you must follow:
 
 async function fetchPages(employer: { website: string | null; careers_url: string | null; website_domain: string | null }) {
   const pages: { id: string; url: string; title: string | null; text: string }[] = [];
+  const attempts: BriefingAttempt[] = [];
   const seen = new Set<string>();
   const queue: string[] = [];
   if (employer.website) queue.push(employer.website);
@@ -32,6 +34,7 @@ async function fetchPages(employer: { website: string | null; careers_url: strin
     if (!canon || seen.has(canon)) continue;
     seen.add(canon);
     const res = await politeFetch(url, { minIntervalMs: 2500 });
+    attempts.push({ url, ok: res.ok && !!res.text, status: res.status, skipped: res.skipped });
     if (!res.ok || !res.text) continue;
     const { title, text } = extractMainText(res.text, res.url);
     if (text.length < 200) continue;
@@ -46,7 +49,7 @@ async function fetchPages(employer: { website: string | null; careers_url: strin
       }
     }
   }
-  return pages;
+  return { pages, attempts };
 }
 
 export async function aiEmployerBriefing(job: Job<Payload>) {
@@ -54,10 +57,10 @@ export async function aiEmployerBriefing(job: Job<Payload>) {
   const { data: e } = await db().from("employers").select("*").eq("id", employerId).is("deleted_at", null).maybeSingle();
   if (!e) return { skipped: "employer missing" };
   if (!e.website) return { skipped: "no website on record" };
-  const pages = await fetchPages(e);
+  const { pages, attempts } = await fetchPages(e);
   if (pages.length === 0) {
     await db().from("tasks").insert({ title: `Could not fetch ${e.legal_name}'s website for the briefing — check the URL or research manually`, task_type: "research", entity_type: "employer", entity_id: employerId, employer_id: employerId, auto_generated: true, dedupe_key: `briefing_fetch_failed:${employerId}` });
-    return { skipped: "no fetchable pages" };
+    return { skipped: "no fetchable pages", attempts };
   }
   // Record each fetched page as a source so claims can point at it.
   const sourceIds = new Map<string, string>();
@@ -72,7 +75,7 @@ export async function aiEmployerBriefing(job: Job<Payload>) {
   const result = await runStructured<EmployerBriefing>({ purpose: "employer_briefing", entityType: "employer", entityId: employerId, promptVersion: PROMPT_VERSION, system: SYSTEM, user, schema: employerBriefingSchema, maxTokens: 6000 });
   if (!result.ok) {
     logger.warn({ employerId, reason: result.reason }, "briefing failed");
-    return { skipped: result.reason };
+    return { skipped: result.reason, attempts };
   }
   const b = result.data;
   const sid = (ids: string[]) => ids.map((i) => sourceIds.get(i)).find(Boolean) ?? null;
@@ -129,5 +132,5 @@ export async function aiEmployerBriefing(job: Job<Payload>) {
   await db().from("tasks").insert({ title: `Review AI briefing for ${e.legal_name} and confirm the fit notes before any outreach`, task_type: "research", entity_type: "employer", entity_id: employerId, employer_id: employerId, auto_generated: true, dedupe_key: `briefing_review:${employerId}`, priority: "normal" });
   await db().from("job_requests").insert({ job_name: "scoring.recompute", payload: { employerId }, singleton_key: `score:${employerId}` });
   if (e.outreach_stage === "awaiting_research" || e.outreach_stage === "discovered") await db().from("employers").update({ outreach_stage: "research_in_progress" }).eq("id", employerId);
-  return { employerId, pages: pages.length, cached: result.cached, projects: b.projects.length, contacts: b.contacts.length, signals: b.hiring_signals.length };
+  return { employerId, attempts, pages: pages.length, cached: result.cached, projects: b.projects.length, contacts: b.contacts.length, signals: b.hiring_signals.length };
 }

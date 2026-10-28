@@ -12,6 +12,9 @@ import { enrichCareersPages } from "./enrich.careers_pages.js";
 import { aiEmployerBriefing } from "./ai.employer_briefing.js";
 import { aiVacancyExtract } from "./ai.vacancy_extract.js";
 import { discoveryJob } from "./discovery.js";
+import { researchVacancy } from "./research.vacancy.js";
+import { researchEmployer } from "./research.employer.js";
+import { assessmentsRecompute } from "./assessments.recompute.js";
 import { discoverCareersPages } from "./discovery.careers_pages.js";
 import { discoveryEmailAlerts } from "./discovery.email_alerts.js";
 import { tasksFollowUps } from "./tasks.follow_ups.js";
@@ -44,6 +47,9 @@ export const HANDLERS: Record<string, Handler> = {
   "enrich.careers_pages": enrichCareersPages,
   "ai.employer_briefing": aiEmployerBriefing,
   "ai.vacancy_extract": aiVacancyExtract,
+  "research.vacancy": researchVacancy,
+  "research.employer": researchEmployer,
+  "assessments.recompute": assessmentsRecompute,
   "scoring.recompute": scoringRecompute,
   "review.stale_records": reviewStaleRecords,
   "tasks.follow_ups": tasksFollowUps,
