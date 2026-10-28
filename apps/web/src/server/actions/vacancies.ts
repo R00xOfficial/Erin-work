@@ -154,7 +154,8 @@ export async function recheckEligibility(id: string) {
   revalidatePath(`/vacancies/${id}`);
 }
 
-export async function dismissVacancy(id: string, status: "closed" | "withdrawn") {
+/** Records that the job itself has closed. For "not interested" use dismissVacancy in discovery.ts, which leaves status alone. */
+export async function closeVacancy(id: string, status: "closed" | "withdrawn") {
   const { supabase } = await requireUser();
   const { error } = await supabase.from("vacancies").update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
   if (error) throw new Error(error.message);

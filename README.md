@@ -72,6 +72,8 @@ Migrations are plain SQL in `supabase/migrations` (the schema is the contract fo
 | 1300 views | dashboard counts, today's actions, queues, data-quality issues |
 | 1400 rls | RLS on every table (authenticated only), storage bucket `documents` |
 | 1500 reference_data | zones, stage metadata, scoring weights v1, settings defaults, templates, source definitions |
+| 1600 security_hardening | linter fixes, `fn_can_send` restricted to the worker |
+| 1700 discovery_state | Stage 1 triage state (new / saved / dismissed, separate from vacancy status), adjacent-role flag, `v_discovery_*` views behind the Discovery page |
 
 Rules the schema enforces: employers are unique on Companies House number, website domain and normalised
 name; vacancies on canonical URL; activities on provider message id and idempotency key; every claim carries

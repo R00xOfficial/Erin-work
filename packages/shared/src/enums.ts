@@ -137,6 +137,9 @@ export const EMAIL_VERIFICATION = ["unverified", "pattern_inferred", "confirmed_
 export const CONTACT_CHANNELS = ["email", "phone", "linkedin", "contact_form", "in_person"] as const;
 export const RELATIONSHIP_STATUSES = ["none", "contacted", "replied", "warm", "met"] as const;
 
+export const DISCOVERY_STATES = ["new", "saved", "dismissed"] as const;
+export type DiscoveryState = (typeof DISCOVERY_STATES)[number];
+
 export const VACANCY_STATUSES = ["open", "closing_soon", "closed", "filled", "withdrawn", "unverified"] as const;
 export type VacancyStatus = (typeof VACANCY_STATUSES)[number];
 export const EMPLOYMENT_TYPES = [
